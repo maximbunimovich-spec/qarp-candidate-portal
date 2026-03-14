@@ -152,7 +152,7 @@ async function syncCandidateToSheet(candidate: any): Promise<void> {
     await sheets.spreadsheets.values.update({
       spreadsheetId: SPREADSHEET_ID,
       range,
-      valueInputOption: "USER_ENTERED",
+      valueInputOption: "RAW",
       requestBody: {
         values: [rowData],
       },
