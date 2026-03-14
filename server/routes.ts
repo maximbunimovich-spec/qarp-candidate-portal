@@ -252,7 +252,7 @@ async function uploadCVToDrive(
     console.log(`[QARP] CV uploaded to Drive: ${safeName} (id: ${fileId})`);
     return webLink || `https://drive.google.com/file/d/${fileId}/view`;
   } catch (err: any) {
-    console.error("[QARP] Drive upload error:", err.message);
+    console.error("[QARP] Drive upload error:", err.message, JSON.stringify(err.response?.data || {}));
     return null;
   }
 }
@@ -351,7 +351,50 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         googleDrive: driveOk ? "connected" : "disabled (no GOOGLE_DRIVE_FOLDER_ID)",
         email: emailOk ? "connected" : "disabled (no credentials)",
       },
+      driveFolderId: DRIVE_FOLDER_ID || "not set",
     });
+  });
+
+  // Test Drive upload endpoint
+  app.get("/api/health/test-drive", async (_req: Request, res: Response) => {
+    const drive = getDriveClient();
+    if (!drive) {
+      return res.json({ success: false, error: "Drive client not initialized" });
+    }
+    try {
+      // Try to create a small test file
+      const { Readable } = await import('stream');
+      const testContent = `QARP Drive Test - ${new Date().toISOString()}`;
+      const stream = new Readable();
+      stream.push(Buffer.from(testContent, 'utf-8'));
+      stream.push(null);
+
+      const response = await drive.files.create({
+        requestBody: {
+          name: `_qarp_test_${Date.now()}.txt`,
+          parents: [DRIVE_FOLDER_ID],
+        },
+        media: {
+          mimeType: 'text/plain',
+          body: stream,
+        },
+        fields: 'id, name, webViewLink, parents',
+      });
+
+      return res.json({
+        success: true,
+        file: response.data,
+        folderId: DRIVE_FOLDER_ID,
+      });
+    } catch (err: any) {
+      console.error("[QARP] Test Drive error:", err.message, err.response?.data);
+      return res.json({
+        success: false,
+        error: err.message,
+        details: err.response?.data?.error || null,
+        folderId: DRIVE_FOLDER_ID,
+      });
+    }
   });
 
   // Register new candidate
