@@ -60,7 +60,7 @@ function getGoogleAuth() {
       credentials: key,
       scopes: [
         "https://www.googleapis.com/auth/spreadsheets",
-        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive",
       ],
     });
     console.log("[QARP] Google Auth initialized (Sheets + Drive)");
