@@ -3,11 +3,11 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage, verifyPassword } from "./storage";
 import { registerSchema, loginSchema, adminLoginSchema, profileSchema, questionnaireSchema } from "@shared/schema";
-import { execSync, exec } from "child_process";
-import { promisify } from "util";
-const execAsync = promisify(exec);
+import { execSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
+import { google } from "googleapis";
+import nodemailer from "nodemailer";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -28,7 +28,7 @@ const upload = multer({
 
 const ADMIN_PASSWORD = "qarp2026admin";
 const SPREADSHEET_ID = "1NPR2NHHXHrc-YWNIZfyUfTwBdBiBNlGZG0MjGRp4BTA";
-const WORKSHEET_ID = 0;
+const SHEET_NAME = "Sheet1"; // Adjust if your sheet has a different name
 
 // Notification recipients
 const NOTIFY_EMAILS = [
@@ -37,27 +37,55 @@ const NOTIFY_EMAILS = [
   "bd@theqarp.com"
 ];
 
-// --- External Tool Helper (ASYNC — does NOT block event loop) ---
-// On external hosting, external-tool CLI is not available — calls silently fail
-async function callExternalToolAsync(sourceId: string, toolName: string, args: Record<string, any>): Promise<any> {
+// --- Google Sheets API Setup ---
+let sheetsClient: ReturnType<typeof google.sheets> | null = null;
+
+function getSheetsClient() {
+  if (sheetsClient) return sheetsClient;
+
+  const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  if (!keyJson) {
+    console.log("[QARP] GOOGLE_SERVICE_ACCOUNT_KEY not set — Sheets sync disabled");
+    return null;
+  }
+
   try {
-    const payload = JSON.stringify({
-      source_id: sourceId,
-      tool_name: toolName,
-      arguments: args,
+    const key = JSON.parse(keyJson);
+    const auth = new google.auth.GoogleAuth({
+      credentials: key,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     });
-    const { stdout } = await execAsync(`external-tool call '${payload.replace(/'/g, "'\\''")}'`, {
-      timeout: 30000,
-      encoding: "utf-8",
-    });
-    return JSON.parse(stdout);
+    sheetsClient = google.sheets({ version: "v4", auth });
+    console.log("[QARP] Google Sheets API initialized");
+    return sheetsClient;
   } catch (err: any) {
-    // Silently fail on external hosting where external-tool is not available
-    if (err.message?.includes('not found') || err.message?.includes('ENOENT')) {
-      console.log(`[QARP] External tool not available (${toolName}) — running in standalone mode`);
-    } else {
-      console.error(`[QARP] External tool error (${toolName}):`, err.message);
-    }
+    console.error("[QARP] Failed to init Sheets API:", err.message);
+    return null;
+  }
+}
+
+// --- Nodemailer SMTP Setup ---
+let emailTransporter: nodemailer.Transporter | null = null;
+
+function getEmailTransporter() {
+  if (emailTransporter) return emailTransporter;
+
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) {
+    console.log("[QARP] GMAIL_USER or GMAIL_APP_PASSWORD not set — email notifications disabled");
+    return null;
+  }
+
+  try {
+    emailTransporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
+    });
+    console.log("[QARP] Nodemailer SMTP initialized for", user);
+    return emailTransporter;
+  } catch (err: any) {
+    console.error("[QARP] Failed to init Nodemailer:", err.message);
     return null;
   }
 }
@@ -66,8 +94,7 @@ async function callExternalToolAsync(sourceId: string, toolName: string, args: R
 const emailToSheetRow: Map<string, number> = new Map();
 let nextSheetRow = 2; // Row 1 is headers
 
-// --- Google Sheets Integration ---
-// Column mapping: A-Z correspond to the 26 header columns
+// --- Google Sheets Integration (Direct API) ---
 const SHEET_COLUMNS = [
   "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
   "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
@@ -106,16 +133,10 @@ function buildRowData(candidate: any): string[] {
   ];
 }
 
-async function updateSheetCellAsync(cell: string, value: string): Promise<void> {
-  await callExternalToolAsync("google_sheets__pipedream", "google_sheets-update-cell", {
-    sheetId: SPREADSHEET_ID,
-    worksheetId: WORKSHEET_ID,
-    cell,
-    newCell: value,
-  });
-}
-
 async function syncCandidateToSheet(candidate: any): Promise<void> {
+  const sheets = getSheetsClient();
+  if (!sheets) return;
+
   try {
     const rowData = buildRowData(candidate);
     let row = emailToSheetRow.get(candidate.email.toLowerCase());
@@ -126,62 +147,59 @@ async function syncCandidateToSheet(candidate: any): Promise<void> {
       nextSheetRow++;
     }
 
-    // Write cells sequentially but async (doesn't block event loop)
-    for (let i = 0; i < rowData.length; i++) {
-      const cell = `${SHEET_COLUMNS[i]}${row}`;
-      const value = rowData[i];
-      if (value) {
-        await updateSheetCellAsync(cell, value);
-      }
-    }
+    // Use batch update to write the entire row at once (much faster than cell-by-cell)
+    const range = `${SHEET_NAME}!A${row}:Z${row}`;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: SPREADSHEET_ID,
+      range,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [rowData],
+      },
+    });
+
     console.log(`[QARP] Synced sheet row ${row} for ${candidate.email}`);
   } catch (err: any) {
     console.error("[QARP] Sheet sync error:", err.message);
   }
 }
 
-// --- Google Drive Integration ---
-async function uploadCVToDrive(candidate: any, cvData: { filename: string; data: string; mimetype: string }): Promise<void> {
+// On startup, read existing rows to build the emailToSheetRow map
+async function initSheetRowMap(): Promise<void> {
+  const sheets = getSheetsClient();
+  if (!sheets) return;
+
   try {
-    // Save CV to temp file
-    const safeName = `${candidate.profile?.fullName || candidate.email}_CV_${cvData.filename}`.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const tempPath = `/home/user/workspace/cv_uploads/${safeName}`;
-    const dir = path.dirname(tempPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(tempPath, Buffer.from(cvData.data, 'base64'));
-
-    // Upload to Google Drive (async)
-    const result = await callExternalToolAsync("google_drive", "export_files", {
-      file_paths: [tempPath],
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!D2:D500`, // Column D = Email
     });
-
-    if (result) {
-      console.log(`[QARP] CV uploaded to Drive for ${candidate.email}:`, safeName);
+    const rows = response.data.values || [];
+    for (let i = 0; i < rows.length; i++) {
+      const email = rows[i][0];
+      if (email) {
+        emailToSheetRow.set(email.toLowerCase().trim(), i + 2);
+        nextSheetRow = Math.max(nextSheetRow, i + 3);
+      }
     }
-
-    // Clean up temp file after small delay
-    setTimeout(() => {
-      try { fs.unlinkSync(tempPath); } catch {}
-    }, 5000);
+    console.log(`[QARP] Loaded ${emailToSheetRow.size} existing rows from sheet, next row: ${nextSheetRow}`);
   } catch (err: any) {
-    console.error("[QARP] Drive upload error:", err.message);
+    console.error("[QARP] Failed to init sheet row map:", err.message);
   }
 }
 
-// --- Email Notification ---
+// --- Email Notification (Nodemailer) ---
 async function sendNotificationEmail(subject: string, body: string): Promise<void> {
+  const transporter = getEmailTransporter();
+  if (!transporter) return;
+
   try {
-    await callExternalToolAsync("gcal", "send_email", {
-      action: {
-        action: "send",
-        to: NOTIFY_EMAILS,
-        subject,
-        body,
-        in_reply_to: null,
-      },
-      user_prompt: null,
+    const fromUser = process.env.GMAIL_USER;
+    await transporter.sendMail({
+      from: `"QARP Candidate Portal" <${fromUser}>`,
+      to: NOTIFY_EMAILS.join(", "),
+      subject,
+      text: body,
     });
     console.log(`[QARP] Notification email sent: ${subject}`);
   } catch (err: any) {
@@ -207,7 +225,7 @@ async function notifyProfileComplete(candidate: any): Promise<void> {
 async function notifyCVUploaded(candidate: any, filename: string): Promise<void> {
   await sendNotificationEmail(
     `[QARP Portal] CV Uploaded: ${candidate.profile?.fullName || candidate.email}`,
-    `A candidate has uploaded their CV on The QARP Candidate Portal.\n\nName: ${candidate.profile?.fullName || candidate.email}\nEmail: ${candidate.email}\nFile: ${filename}\n\nThe CV has been automatically saved to Google Drive.`
+    `A candidate has uploaded their CV on The QARP Candidate Portal.\n\nName: ${candidate.profile?.fullName || candidate.email}\nEmail: ${candidate.email}\nFile: ${filename}`
   );
 }
 
@@ -220,11 +238,27 @@ async function notifyQuestionnaireComplete(candidate: any): Promise<void> {
 }
 
 export async function registerRoutes(server: Server, app: Express): Promise<void> {
+  // Initialize sheet row map on startup
+  initSheetRowMap().catch(err => console.error("[QARP] initSheetRowMap error:", err.message));
+
   // Helper to strip password hash from candidate before sending to client
   function safeCandidate(c: any) {
     const { passwordHash, ...rest } = c;
     return rest;
   }
+
+  // Health check endpoint
+  app.get("/api/health", (_req: Request, res: Response) => {
+    const sheetsOk = !!getSheetsClient();
+    const emailOk = !!getEmailTransporter();
+    return res.json({
+      status: "ok",
+      integrations: {
+        googleSheets: sheetsOk ? "connected" : "disabled (no credentials)",
+        email: emailOk ? "connected" : "disabled (no credentials)",
+      },
+    });
+  });
 
   // Register new candidate
   app.post("/api/candidates/register", (req: Request, res: Response) => {
@@ -328,10 +362,10 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     const candidate = storage.uploadCV(req.params.id, cvData);
     if (!candidate) return res.status(404).json({ error: "Candidate not found" });
 
-    // Fire-and-forget: upload to Drive + sync sheet + notify (non-blocking)
+    // Fire-and-forget: sync sheet + notify (non-blocking)
+    // Note: Google Drive upload removed — requires OAuth. CVs are stored in-app.
     (async () => {
       try {
-        await uploadCVToDrive(candidate, cvData);
         await syncCandidateToSheet(candidate);
         await notifyCVUploaded(candidate, cvData.filename);
       } catch (e: any) {
@@ -404,16 +438,12 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       const inputPath = `/tmp/cv_input_${candidate.id}.json`;
       const outputPath = `/tmp/QARP_CV_${safeName}.pdf`;
 
-      // Write candidate data to temp JSON
       fs.writeFileSync(inputPath, JSON.stringify(candidate));
 
-      // Generate PDF using Python script
-      const scriptPath = path.resolve(__dirname, '..', 'server', 'generate_cv.py');
-      // Try multiple paths for the script
+      // Try multiple paths for the CV generation script
       const possiblePaths = [
-        '/home/user/workspace/qarp-portal/server/generate_cv.py',
         path.resolve(process.cwd(), 'server', 'generate_cv.py'),
-        scriptPath,
+        '/home/user/workspace/qarp-portal/server/generate_cv.py',
       ];
       let actualPath = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
 
@@ -422,12 +452,10 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         encoding: "utf-8",
       });
 
-      // Read and send the PDF
       const pdfBuffer = fs.readFileSync(outputPath);
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="QARP_CV_${safeName}.pdf"`);
 
-      // Cleanup temp files
       setTimeout(() => {
         try { fs.unlinkSync(inputPath); } catch {}
         try { fs.unlinkSync(outputPath); } catch {}
@@ -451,7 +479,12 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       const outputPath = `/tmp/QARP_CV_${safeName}.pdf`;
 
       fs.writeFileSync(inputPath, JSON.stringify(candidate));
-      const actualPath = '/home/user/workspace/qarp-portal/server/generate_cv.py';
+      const possiblePaths = [
+        path.resolve(process.cwd(), 'server', 'generate_cv.py'),
+        '/home/user/workspace/qarp-portal/server/generate_cv.py',
+      ];
+      let actualPath = possiblePaths.find(p => fs.existsSync(p)) || possiblePaths[0];
+
       execSync(`python3 "${actualPath}" "${inputPath}" "${outputPath}"`, {
         timeout: 30000,
         encoding: "utf-8",
