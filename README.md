@@ -1,0 +1,1 @@
+# QARP Candidate Portal\n\nThe QARP network candidate registration portal.\n\n## Deploy on Render\n\n1. Fork this repo\n2. Go to render.com\n3. New Web Service → Connect this repo\n4. Build: npm install && npm run build\n5. Start: npm start\n\nPortal will be live at your Render URL.
