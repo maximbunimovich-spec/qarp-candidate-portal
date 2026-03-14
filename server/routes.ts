@@ -38,6 +38,7 @@ const NOTIFY_EMAILS = [
 ];
 
 // --- Google API Auth (Sheets + Drive) ---
+// NOTE: No caching — always create fresh clients to avoid stale auth
 let googleAuth: InstanceType<typeof google.auth.GoogleAuth> | null = null;
 let sheetsClient: ReturnType<typeof google.sheets> | null = null;
 let driveClient: ReturnType<typeof google.drive> | null = null;
@@ -346,6 +347,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     const driveOk = !!getDriveClient();
     return res.json({
       status: "ok",
+      version: "v3-full-drive-scope",
       integrations: {
         googleSheets: sheetsOk ? "connected" : "disabled (no credentials)",
         googleDrive: driveOk ? "connected" : "disabled (no GOOGLE_DRIVE_FOLDER_ID)",
