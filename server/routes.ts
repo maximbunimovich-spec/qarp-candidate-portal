@@ -300,6 +300,49 @@ async function notifyNewCandidate(email: string): Promise<void> {
   );
 }
 
+// Welcome email to the candidate upon registration
+async function sendWelcomeEmail(candidateEmail: string): Promise<void> {
+  const transporter = getEmailTransporter();
+  if (!transporter) return;
+
+  try {
+    const fromUser = process.env.GMAIL_USER;
+    await transporter.sendMail({
+      from: `"The QARP" <${fromUser}>`,
+      to: candidateEmail,
+      subject: "Welcome to The QARP Candidate Portal",
+      html: `
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <div style="background: #0B1120; padding: 24px 32px; border-radius: 8px 8px 0 0;">
+            <h1 style="color: #ffffff; font-size: 20px; margin: 0;">The QARP</h1>
+            <p style="color: #00B4D8; font-size: 12px; margin: 4px 0 0;">Quality Assurance Research Professionals</p>
+          </div>
+          <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+            <h2 style="font-size: 18px; color: #0B1120; margin-top: 0;">Welcome!</h2>
+            <p>Thank you for registering on The QARP Candidate Portal.</p>
+            <p>Your account has been successfully created. To complete your application, please:</p>
+            <ol style="line-height: 1.8;">
+              <li>Fill in your <strong>profile</strong> information</li>
+              <li>Upload your <strong>CV</strong></li>
+              <li>Complete the <strong>questionnaire</strong></li>
+            </ol>
+            <p>You can log in anytime using your registered email and password:</p>
+            <div style="text-align: center; margin: 24px 0;">
+              <a href="https://qarp-candidate-portal.onrender.com" style="background: #00B4D8; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Portal</a>
+            </div>
+            <p style="color: #6b7280; font-size: 13px;">If you have any questions, please contact us at <a href="mailto:info@theqarp.com" style="color: #00B4D8;">info@theqarp.com</a></p>
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+            <p style="color: #9ca3af; font-size: 11px; margin-bottom: 0;">The QARP — Quality Assurance Research Professionals<br/>This is an automated message. Please do not reply directly to this email.</p>
+          </div>
+        </div>
+      `,
+    });
+    console.log(`[QARP] Welcome email sent to ${candidateEmail}`);
+  } catch (err: any) {
+    console.error("[QARP] Welcome email error:", err.message);
+  }
+}
+
 async function notifyProfileComplete(candidate: any): Promise<void> {
   const p = candidate.profile || {};
   await sendNotificationEmail(
@@ -373,11 +416,12 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       const candidate = storage.createCandidate(email, password);
       console.log(`[QARP] New candidate registered: ${email}`);
 
-      // Fire-and-forget: sync to sheet + send notification (non-blocking)
+      // Fire-and-forget: sync to sheet + send notifications (non-blocking)
       (async () => {
         try {
           await syncCandidateToSheet(candidate);
           await notifyNewCandidate(email);
+          await sendWelcomeEmail(email);
         } catch (e: any) {
           console.error('[QARP] Background sync error:', e.message);
         }
