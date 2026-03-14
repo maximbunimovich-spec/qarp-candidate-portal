@@ -4,7 +4,7 @@ import { QarpLogoFull } from "@/components/QarpLogo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { User, Upload, ClipboardList, CheckCircle2, Circle, LogOut, FileText, GraduationCap, Bot, Sparkles, ExternalLink } from "lucide-react";
+import { User, Upload, ClipboardList, CheckCircle2, Circle, LogOut, FileText, GraduationCap, Bot, Sparkles, ExternalLink, Wand2 } from "lucide-react";
 import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 
 export default function DashboardPage() {
@@ -135,21 +135,25 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Generated CV card */}
-          {canGenerateCV && (
+          {/* AI QARP CV Generation card */}
+          {!!candidate.cv && candidate.profileCompleted && (
             <Card className="bg-card border-primary/30">
               <CardContent className="py-5 px-6 flex items-center gap-5">
                 <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-6 h-6 text-primary" />
+                  <Wand2 className="w-6 h-6 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-display text-base font-semibold text-foreground">QARP Standardized CV</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display text-base font-semibold text-foreground">AI-Powered QARP CV</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Your profile and questionnaire are complete. View your generated QARP CV.
+                    Generate a standardized QARP CV using AI, then review and submit to our expert database.
                   </p>
                 </div>
-                <Button onClick={() => setLocation("/generated-cv")} data-testid="button-view-cv">
-                  View CV
+                <Button onClick={() => setLocation("/generated-cv")} data-testid="button-generate-ai-cv">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate CV
                 </Button>
               </CardContent>
             </Card>
