@@ -245,6 +245,7 @@ async function uploadCVToDrive(
         mimeType: cvData.mimetype,
         body: stream,
       },
+      supportsAllDrives: true,
       fields: 'id, webViewLink',
     });
 
@@ -377,6 +378,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       const resp1 = await drive.files.create({
         requestBody: { name: `_qarp_test_root_${Date.now()}.txt` },
         media: { mimeType: 'text/plain', body: stream1 },
+        supportsAllDrives: true,
         fields: 'id, name, webViewLink',
       });
       results.tests.rootUpload = { success: true, file: resp1.data };
@@ -398,6 +400,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
           parents: [DRIVE_FOLDER_ID],
         },
         media: { mimeType: 'text/plain', body: stream2 },
+        supportsAllDrives: true,
         fields: 'id, name, webViewLink, parents',
       });
       results.tests.folderUpload = { success: true, file: resp2.data };
