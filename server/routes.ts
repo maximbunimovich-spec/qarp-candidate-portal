@@ -349,7 +349,7 @@ async function sendWelcomeEmail(candidateEmail: string): Promise<void> {
                 <td style="padding: 8px 12px; font-size: 13px; color: #4b5563; border-bottom: 1px solid #f3f4f6;">Training sessions delivered</td>
               </tr>
               <tr>
-                <td style="padding: 8px 12px; font-size: 13px; color: #0B1120; font-weight: 600; border-bottom: 1px solid #f3f4f6;">1,000+</td>
+                <td style="padding: 8px 12px; font-size: 13px; color: #0B1120; font-weight: 600; border-bottom: 1px solid #f3f4f6;">2,000+</td>
                 <td style="padding: 8px 12px; font-size: 13px; color: #4b5563; border-bottom: 1px solid #f3f4f6;">Audits completed worldwide</td>
               </tr>
               <tr>
