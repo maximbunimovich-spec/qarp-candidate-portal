@@ -348,7 +348,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     const driveOk = !!getDriveClient();
     return res.json({
       status: "ok",
-      version: "v3-full-drive-scope",
       integrations: {
         googleSheets: sheetsOk ? "connected" : "disabled (no credentials)",
         googleDrive: driveOk ? "connected" : "disabled (no GOOGLE_DRIVE_FOLDER_ID)",
@@ -358,59 +357,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     });
   });
 
-  // Test Drive upload endpoint
-  app.get("/api/health/test-drive", async (_req: Request, res: Response) => {
-    const drive = getDriveClient();
-    if (!drive) {
-      return res.json({ success: false, error: "Drive client not initialized" });
-    }
-
-    const results: any = { folderId: DRIVE_FOLDER_ID, tests: {} };
-
-    // Test 1: Try creating file WITHOUT parents (in service account root)
-    try {
-      const { Readable } = await import('stream');
-      const testContent = `QARP Drive Test (no parent) - ${new Date().toISOString()}`;
-      const stream1 = new Readable();
-      stream1.push(Buffer.from(testContent, 'utf-8'));
-      stream1.push(null);
-
-      const resp1 = await drive.files.create({
-        requestBody: { name: `_qarp_test_root_${Date.now()}.txt` },
-        media: { mimeType: 'text/plain', body: stream1 },
-        supportsAllDrives: true,
-        fields: 'id, name, webViewLink',
-      });
-      results.tests.rootUpload = { success: true, file: resp1.data };
-    } catch (err: any) {
-      results.tests.rootUpload = { success: false, error: err.message, code: err.response?.data?.error?.code };
-    }
-
-    // Test 2: Try creating file WITH parent folder
-    try {
-      const { Readable } = await import('stream');
-      const testContent2 = `QARP Drive Test (with parent) - ${new Date().toISOString()}`;
-      const stream2 = new Readable();
-      stream2.push(Buffer.from(testContent2, 'utf-8'));
-      stream2.push(null);
-
-      const resp2 = await drive.files.create({
-        requestBody: {
-          name: `_qarp_test_folder_${Date.now()}.txt`,
-          parents: [DRIVE_FOLDER_ID],
-        },
-        media: { mimeType: 'text/plain', body: stream2 },
-        supportsAllDrives: true,
-        fields: 'id, name, webViewLink, parents',
-      });
-      results.tests.folderUpload = { success: true, file: resp2.data };
-    } catch (err: any) {
-      results.tests.folderUpload = { success: false, error: err.message, code: err.response?.data?.error?.code, details: err.response?.data?.error };
-    }
-
-    results.success = results.tests.rootUpload?.success || results.tests.folderUpload?.success;
-    return res.json(results);
-  });
 
   // Register new candidate
   app.post("/api/candidates/register", (req: Request, res: Response) => {
