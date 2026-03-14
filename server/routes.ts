@@ -37,31 +37,60 @@ const NOTIFY_EMAILS = [
   "bd@theqarp.com"
 ];
 
-// --- Google Sheets API Setup ---
+// --- Google API Auth (Sheets + Drive) ---
+let googleAuth: InstanceType<typeof google.auth.GoogleAuth> | null = null;
 let sheetsClient: ReturnType<typeof google.sheets> | null = null;
+let driveClient: ReturnType<typeof google.drive> | null = null;
 
-function getSheetsClient() {
-  if (sheetsClient) return sheetsClient;
+// Google Drive folder ID for CV uploads (set via GOOGLE_DRIVE_FOLDER_ID env var)
+const DRIVE_FOLDER_ID = process.env.GOOGLE_DRIVE_FOLDER_ID || "";
+
+function getGoogleAuth() {
+  if (googleAuth) return googleAuth;
 
   const keyJson = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
-    console.log("[QARP] GOOGLE_SERVICE_ACCOUNT_KEY not set — Sheets sync disabled");
+    console.log("[QARP] GOOGLE_SERVICE_ACCOUNT_KEY not set — Google APIs disabled");
     return null;
   }
 
   try {
     const key = JSON.parse(keyJson);
-    const auth = new google.auth.GoogleAuth({
+    googleAuth = new google.auth.GoogleAuth({
       credentials: key,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+      scopes: [
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive.file",
+      ],
     });
-    sheetsClient = google.sheets({ version: "v4", auth });
-    console.log("[QARP] Google Sheets API initialized");
-    return sheetsClient;
+    console.log("[QARP] Google Auth initialized (Sheets + Drive)");
+    return googleAuth;
   } catch (err: any) {
-    console.error("[QARP] Failed to init Sheets API:", err.message);
+    console.error("[QARP] Failed to init Google Auth:", err.message);
     return null;
   }
+}
+
+function getSheetsClient() {
+  if (sheetsClient) return sheetsClient;
+  const auth = getGoogleAuth();
+  if (!auth) return null;
+  sheetsClient = google.sheets({ version: "v4", auth });
+  console.log("[QARP] Google Sheets API initialized");
+  return sheetsClient;
+}
+
+function getDriveClient() {
+  if (driveClient) return driveClient;
+  const auth = getGoogleAuth();
+  if (!auth) return null;
+  if (!DRIVE_FOLDER_ID) {
+    console.log("[QARP] GOOGLE_DRIVE_FOLDER_ID not set — Drive uploads disabled");
+    return null;
+  }
+  driveClient = google.drive({ version: "v3", auth });
+  console.log("[QARP] Google Drive API initialized");
+  return driveClient;
 }
 
 // --- Nodemailer SMTP Setup ---
@@ -188,8 +217,58 @@ async function initSheetRowMap(): Promise<void> {
   }
 }
 
+// --- Google Drive CV Upload ---
+async function uploadCVToDrive(
+  candidate: any,
+  cvData: { filename: string; data: string; mimetype: string }
+): Promise<string | null> {
+  const drive = getDriveClient();
+  if (!drive) return null;
+
+  try {
+    const candidateName = candidate.profile?.fullName || candidate.email;
+    const safeName = `${candidateName}_CV_${cvData.filename}`.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const buffer = Buffer.from(cvData.data, 'base64');
+
+    const { Readable } = await import('stream');
+    const stream = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    const response = await drive.files.create({
+      requestBody: {
+        name: safeName,
+        parents: [DRIVE_FOLDER_ID],
+      },
+      media: {
+        mimeType: cvData.mimetype,
+        body: stream,
+      },
+      fields: 'id, webViewLink',
+    });
+
+    const fileId = response.data.id;
+    const webLink = response.data.webViewLink;
+    console.log(`[QARP] CV uploaded to Drive: ${safeName} (id: ${fileId})`);
+    return webLink || `https://drive.google.com/file/d/${fileId}/view`;
+  } catch (err: any) {
+    console.error("[QARP] Drive upload error:", err.message);
+    return null;
+  }
+}
+
 // --- Email Notification (Nodemailer) ---
-async function sendNotificationEmail(subject: string, body: string): Promise<void> {
+interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+}
+
+async function sendNotificationEmail(
+  subject: string,
+  body: string,
+  attachments?: EmailAttachment[]
+): Promise<void> {
   const transporter = getEmailTransporter();
   if (!transporter) return;
 
@@ -200,6 +279,11 @@ async function sendNotificationEmail(subject: string, body: string): Promise<voi
       to: NOTIFY_EMAILS.join(", "),
       subject,
       text: body,
+      attachments: attachments?.map(a => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+      })),
     });
     console.log(`[QARP] Notification email sent: ${subject}`);
   } catch (err: any) {
@@ -222,10 +306,18 @@ async function notifyProfileComplete(candidate: any): Promise<void> {
   );
 }
 
-async function notifyCVUploaded(candidate: any, filename: string): Promise<void> {
+async function notifyCVUploaded(
+  candidate: any,
+  filename: string,
+  cvBuffer: Buffer,
+  mimetype: string,
+  driveLink: string | null
+): Promise<void> {
+  const driveLine = driveLink ? `\nGoogle Drive: ${driveLink}` : '';
   await sendNotificationEmail(
     `[QARP Portal] CV Uploaded: ${candidate.profile?.fullName || candidate.email}`,
-    `A candidate has uploaded their CV on The QARP Candidate Portal.\n\nName: ${candidate.profile?.fullName || candidate.email}\nEmail: ${candidate.email}\nFile: ${filename}`
+    `A candidate has uploaded their CV on The QARP Candidate Portal.\n\nName: ${candidate.profile?.fullName || candidate.email}\nEmail: ${candidate.email}\nFile: ${filename}${driveLine}`,
+    [{ filename, content: cvBuffer, contentType: mimetype }]
   );
 }
 
@@ -251,10 +343,12 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
   app.get("/api/health", (_req: Request, res: Response) => {
     const sheetsOk = !!getSheetsClient();
     const emailOk = !!getEmailTransporter();
+    const driveOk = !!getDriveClient();
     return res.json({
       status: "ok",
       integrations: {
         googleSheets: sheetsOk ? "connected" : "disabled (no credentials)",
+        googleDrive: driveOk ? "connected" : "disabled (no GOOGLE_DRIVE_FOLDER_ID)",
         email: emailOk ? "connected" : "disabled (no credentials)",
       },
     });
@@ -362,12 +456,13 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     const candidate = storage.uploadCV(req.params.id, cvData);
     if (!candidate) return res.status(404).json({ error: "Candidate not found" });
 
-    // Fire-and-forget: sync sheet + notify (non-blocking)
-    // Note: Google Drive upload removed — requires OAuth. CVs are stored in-app.
+    // Fire-and-forget: upload to Drive + sync sheet + notify with attachment (non-blocking)
     (async () => {
       try {
+        const driveLink = await uploadCVToDrive(candidate, cvData);
         await syncCandidateToSheet(candidate);
-        await notifyCVUploaded(candidate, cvData.filename);
+        const cvBuffer = Buffer.from(cvData.data, 'base64');
+        await notifyCVUploaded(candidate, cvData.filename, cvBuffer, cvData.mimetype, driveLink);
       } catch (e: any) {
         console.error('[QARP] Background sync error:', e.message);
       }
