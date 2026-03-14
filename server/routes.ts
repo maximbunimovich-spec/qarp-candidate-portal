@@ -535,6 +535,21 @@ IMPORTANT RULES:
 - Keep the tone professional and aligned with pharmaceutical industry standards
 - Return ONLY valid JSON, no markdown formatting`;
 
+// Repair common JSON issues produced by LLMs
+function repairJSON(str: string): string {
+  // Remove BOM and zero-width characters
+  str = str.replace(/^\uFEFF/, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
+  // Remove trailing commas before } or ]
+  str = str.replace(/,\s*([}\]])/g, '$1');
+  // Fix unescaped newlines inside string values
+  str = str.replace(/(["'])([^"']*?)\n([^"']*?)\1/g, (match, q, before, after) => {
+    return q + before + '\\n' + after + q;
+  });
+  // Remove control characters that break JSON (except \n \r \t)
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+  return str;
+}
+
 async function generateQARPCV(candidate: any): Promise<any> {
   const ai = getGeminiClient();
   if (!ai) throw new Error('AI service not available');
@@ -601,7 +616,11 @@ ${cvText || '(No CV text available)'}
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('AI did not return valid JSON');
 
-      const cvData = JSON.parse(jsonMatch[0]);
+      let jsonStr = jsonMatch[0];
+      // Repair common JSON issues from LLMs
+      jsonStr = repairJSON(jsonStr);
+
+      const cvData = JSON.parse(jsonStr);
       console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName}`);
       return cvData;
     } catch (err: any) {
@@ -610,6 +629,27 @@ ${cvText || '(No CV text available)'}
       // If rate limited (429), try next model
       if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('quota')) {
         console.log(`[QARP] Rate limited on ${modelName}, trying next model...`);
+        continue;
+      }
+      // If JSON parse error, retry with same model once
+      if (err.message?.includes('JSON') || err.message?.includes('position') || err.message?.includes('Unexpected')) {
+        console.log(`[QARP] JSON parse error on ${modelName}, retrying...`);
+        try {
+          const retryResponse = await ai.models.generateContent({
+            model: modelName,
+            contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\nIMPORTANT: Return ONLY a single valid JSON object. No trailing commas. No comments. Ensure all strings are properly escaped.\n\n' + userMessage }] }],
+            config: { temperature: 0.1, maxOutputTokens: 8000 },
+          });
+          const retryText = retryResponse.text || '';
+          const retryMatch = retryText.match(/\{[\s\S]*\}/);
+          if (retryMatch) {
+            const cvData = JSON.parse(repairJSON(retryMatch[0]));
+            console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName} (retry)`);
+            return cvData;
+          }
+        } catch (retryErr: any) {
+          console.error(`[QARP] Retry also failed:`, retryErr.message);
+        }
         continue;
       }
       // For other errors, throw immediately
