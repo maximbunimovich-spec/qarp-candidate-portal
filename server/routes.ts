@@ -310,29 +310,93 @@ async function sendWelcomeEmail(candidateEmail: string): Promise<void> {
     await transporter.sendMail({
       from: `"The QARP" <${fromUser}>`,
       to: candidateEmail,
-      subject: "Welcome to The QARP Candidate Portal",
+      subject: "Welcome to The QARP Expert Network",
       html: `
-        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <div style="background: #0B1120; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-            <h1 style="color: #ffffff; font-size: 20px; margin: 0;">The QARP</h1>
-            <p style="color: #00B4D8; font-size: 12px; margin: 4px 0 0;">Quality Assurance Research Professionals</p>
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+          <!-- Header -->
+          <div style="background: #0B1120; padding: 28px 32px; border-radius: 8px 8px 0 0;">
+            <h1 style="color: #ffffff; font-size: 22px; margin: 0; letter-spacing: 0.5px;">The QARP</h1>
+            <p style="color: #00B4D8; font-size: 12px; margin: 6px 0 0; letter-spacing: 0.3px;">Quality Assurance Research Professionals</p>
           </div>
-          <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
-            <h2 style="font-size: 18px; color: #0B1120; margin-top: 0;">Welcome!</h2>
-            <p>Thank you for registering on The QARP Candidate Portal.</p>
-            <p>Your account has been successfully created. To complete your application, please:</p>
-            <ol style="line-height: 1.8;">
-              <li>Fill in your <strong>profile</strong> information</li>
-              <li>Upload your <strong>CV</strong></li>
-              <li>Complete the <strong>questionnaire</strong></li>
-            </ol>
-            <p>You can log in anytime using your registered email and password:</p>
-            <div style="text-align: center; margin: 24px 0;">
-              <a href="https://qarp-candidate-portal.onrender.com" style="background: #00B4D8; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Go to Portal</a>
+
+          <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; background: #ffffff;">
+            <!-- Welcome -->
+            <h2 style="font-size: 20px; color: #0B1120; margin-top: 0;">Welcome to the Expert Network!</h2>
+            <p>Thank you for registering on The QARP Candidate Portal. Your account has been successfully created.</p>
+
+            <!-- Next Steps -->
+            <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <p style="font-weight: 600; color: #0B1120; margin-top: 0; font-size: 14px;">Complete your application in 3 steps:</p>
+              <ol style="line-height: 2; margin-bottom: 0; padding-left: 20px;">
+                <li>Fill in your <strong>profile</strong> information</li>
+                <li>Upload your <strong>CV</strong></li>
+                <li>Complete the <strong>questionnaire</strong></li>
+              </ol>
             </div>
-            <p style="color: #6b7280; font-size: 13px;">If you have any questions, please contact us at <a href="mailto:info@theqarp.com" style="color: #00B4D8;">info@theqarp.com</a></p>
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-            <p style="color: #9ca3af; font-size: 11px; margin-bottom: 0;">The QARP — Quality Assurance Research Professionals<br/>This is an automated message. Please do not reply directly to this email.</p>
+
+            <div style="text-align: center; margin: 28px 0;">
+              <a href="https://qarp-candidate-portal.onrender.com" style="background: #00B4D8; color: #ffffff; padding: 14px 36px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 15px;">Go to Portal</a>
+            </div>
+
+            <!-- About The QARP -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
+            <h3 style="font-size: 16px; color: #0B1120; margin-bottom: 8px;">About The QARP</h3>
+            <p style="font-size: 13px; color: #4b5563;">The QARP is a global network of independent GxP auditors, QA consultants, and trainers. We help life sciences organisations build inspection-ready quality systems and deliver GxP compliance at scale.</p>
+            <p style="font-size: 13px; color: #4b5563;">Our expert network spans <strong>Europe, North America, Latin America, Asia, Africa, and Australia</strong>, covering GCP, GLP, GMP, GDP, GVP, CSV, and Data Integrity.</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+              <tr>
+                <td style="padding: 8px 12px; font-size: 13px; color: #0B1120; font-weight: 600; border-bottom: 1px solid #f3f4f6;">1,400+</td>
+                <td style="padding: 8px 12px; font-size: 13px; color: #4b5563; border-bottom: 1px solid #f3f4f6;">Training sessions delivered</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; font-size: 13px; color: #0B1120; font-weight: 600; border-bottom: 1px solid #f3f4f6;">1,000+</td>
+                <td style="padding: 8px 12px; font-size: 13px; color: #4b5563; border-bottom: 1px solid #f3f4f6;">Audits completed worldwide</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 12px; font-size: 13px; color: #0B1120; font-weight: 600;">100+</td>
+                <td style="padding: 8px 12px; font-size: 13px; color: #4b5563;">Experts in the global network</td>
+              </tr>
+            </table>
+
+            <!-- Academy -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
+            <h3 style="font-size: 16px; color: #0B1120; margin-bottom: 8px;">The QARP Academy</h3>
+            <p style="font-size: 13px; color: #4b5563;">Our digital learning platform <strong>theqarpacademy.pro</strong> offers self-paced and live training programmes for GxP professionals:</p>
+            <ul style="font-size: 13px; color: #4b5563; line-height: 2; padding-left: 20px;">
+              <li><strong>GCP Auditor School</strong> &mdash; 10-week certification programme with practical simulations and CPD accreditation</li>
+              <li><strong>ICH GCP E6(R3) courses</strong> &mdash; role-based training for CRAs, QA managers, investigators, and sponsors</li>
+              <li><strong>GxP Compliance modules</strong> &mdash; CAPA, RCA, risk management, data integrity, and more</li>
+              <li><strong>Corporate portals</strong> &mdash; branded training environments with admin dashboards and reporting</li>
+            </ul>
+            <div style="text-align: center; margin: 16px 0;">
+              <a href="https://theqarpacademy.pro" style="color: #00B4D8; font-weight: 600; text-decoration: none; font-size: 13px;">Explore The QARP Academy &rarr;</a>
+            </div>
+
+            <!-- AI -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
+            <h3 style="font-size: 16px; color: #0B1120; margin-bottom: 8px;">AI-Powered GxP Assistant</h3>
+            <p style="font-size: 13px; color: #4b5563;">The QARP Academy integrates a <strong>validated AI GxP Assistant</strong> designed specifically for quality and clinical operations professionals:</p>
+            <ul style="font-size: 13px; color: #4b5563; line-height: 2; padding-left: 20px;">
+              <li>40+ GxP regulatory documents in the knowledge base (ICH E6(R2/R3), FDA 21 CFR, EMA Guidelines)</li>
+              <li>AI-assisted CAPA drafting, Root Cause Analysis, audit checklists, and risk assessments</li>
+              <li>Compliance-first design: 21 CFR Part 11, Annex 11, GDPR</li>
+              <li>Human-in-the-loop approach &mdash; AI supports, experts decide</li>
+              <li>Traceable, auditable reasoning aligned with QMS requirements</li>
+            </ul>
+            <div style="text-align: center; margin: 16px 0;">
+              <a href="https://theqarpacademy.pro/ai" style="color: #00B4D8; font-weight: 600; text-decoration: none; font-size: 13px;">Learn about QARP AI &rarr;</a>
+            </div>
+
+            <!-- Contact -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
+            <p style="font-size: 13px; color: #4b5563;">Questions? Reach out to us:</p>
+            <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">Email: <a href="mailto:info@theqarp.com" style="color: #00B4D8;">info@theqarp.com</a></p>
+            <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">Phone: <a href="tel:+34625263964" style="color: #00B4D8;">+34 625 263 964</a></p>
+            <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">Website: <a href="https://theqarp.com" style="color: #00B4D8;">theqarp.com</a></p>
+
+            <!-- Footer -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0 16px;" />
+            <p style="color: #9ca3af; font-size: 11px; margin-bottom: 0; text-align: center;">The QARP &mdash; Quality Assurance Research Professionals<br/>Global GxP Quality &amp; Compliance: Training &bull; Audits &bull; Expert Network &bull; Technology<br/><br/>This is an automated message. Please do not reply directly to this email.</p>
           </div>
         </div>
       `,
