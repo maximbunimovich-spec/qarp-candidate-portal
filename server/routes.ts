@@ -580,28 +580,44 @@ Training Rate: ${questionnaire.trainingRate || 'N/A'}
 ${cvText || '(No CV text available)'}
 `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\n' + userMessage }] }],
-      config: {
-        temperature: 0.3,
-        maxOutputTokens: 8000,
-      },
-    });
+  // Try models in order of preference (2.5 Flash has free tier quota, 2.0 Flash may not)
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite'];
+  let lastError: Error | null = null;
 
-    const text = response.text || '';
-    // Extract JSON from response (may be wrapped in ```json ... ```)
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('AI did not return valid JSON');
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`[QARP] Trying model ${modelName} for ${candidate.email}...`);
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\n' + userMessage }] }],
+        config: {
+          temperature: 0.3,
+          maxOutputTokens: 8000,
+        },
+      });
 
-    const cvData = JSON.parse(jsonMatch[0]);
-    console.log(`[QARP] AI generated QARP CV for ${candidate.email}`);
-    return cvData;
-  } catch (err: any) {
-    console.error('[QARP] Gemini CV generation error:', err.message);
-    throw new Error('Failed to generate CV: ' + err.message);
+      const text = response.text || '';
+      // Extract JSON from response (may be wrapped in ```json ... ```)
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('AI did not return valid JSON');
+
+      const cvData = JSON.parse(jsonMatch[0]);
+      console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName}`);
+      return cvData;
+    } catch (err: any) {
+      console.error(`[QARP] Gemini ${modelName} error:`, err.message);
+      lastError = err;
+      // If rate limited (429), try next model
+      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('quota')) {
+        console.log(`[QARP] Rate limited on ${modelName}, trying next model...`);
+        continue;
+      }
+      // For other errors, throw immediately
+      throw new Error('Failed to generate CV: ' + err.message);
+    }
   }
+
+  throw new Error('Failed to generate CV: All AI models exhausted. ' + (lastError?.message || 'Please try again later or enable billing on the Google Cloud project.'));
 }
 
 // Store generated CVs in memory (keyed by candidate ID)
