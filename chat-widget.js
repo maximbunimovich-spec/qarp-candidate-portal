@@ -51,8 +51,8 @@
     /* ---------- POPUP ---------- */
     '#qarp-chat-popup {',
     '  position:fixed; bottom:96px; right:24px; z-index:999999;',
-    '  width:400px; max-width:calc(100vw - 32px);',
-    '  height:580px; max-height:calc(100vh - 130px);',
+    '  width:420px; max-width:calc(100vw - 32px);',
+    '  height:600px; max-height:calc(100vh - 130px);',
     '  background:' + BRAND.white + '; border-radius:20px;',
     '  box-shadow:0 16px 60px rgba(11,17,32,0.2),0 4px 20px rgba(0,0,0,0.08);',
     '  display:flex; flex-direction:column; overflow:hidden;',
@@ -83,24 +83,26 @@
     '.qc-messages::-webkit-scrollbar { width:4px; }',
     '.qc-messages::-webkit-scrollbar-thumb { background:' + BRAND.gray300 + '; border-radius:2px; }',
 
-    '.qc-msg { max-width:88%; padding:11px 15px; border-radius:16px; font-family:Inter,sans-serif; font-size:14px; line-height:1.55; word-wrap:break-word; animation:qfade .25s ease; }',
+    '.qc-msg { max-width:88%; padding:12px 16px; border-radius:16px; font-family:Inter,sans-serif; font-size:14px; line-height:1.6; word-wrap:break-word; white-space:pre-wrap; animation:qfade .25s ease; text-align:left; }',
     '@keyframes qfade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }',
     '.qc-msg-bot { align-self:flex-start; background:' + BRAND.white + '; color:' + BRAND.gray800 + '; border:1px solid ' + BRAND.gray200 + '; border-bottom-left-radius:4px; }',
-    '.qc-msg-user { align-self:flex-end; background:linear-gradient(135deg,' + BRAND.teal + ',' + BRAND.tealDark + '); color:' + BRAND.white + '; border-bottom-right-radius:4px; }',
+    '.qc-msg-user { align-self:flex-end; background:linear-gradient(135deg,' + BRAND.teal + ',' + BRAND.tealDark + '); color:' + BRAND.white + '; border-bottom-right-radius:4px; text-align:left; }',
     '.qc-msg-bot a { color:' + BRAND.teal + '; text-decoration:underline; }',
     '.qc-msg-bot strong { font-weight:600; }',
+    '.qc-msg-bot ul, .qc-msg-bot ol { padding-left:18px; margin:6px 0; }',
+    '.qc-msg-bot li { margin:3px 0; }',
 
     /* ---------- WELCOME ---------- */
-    '.qc-welcome { font-family:Inter,sans-serif; font-size:14px; line-height:1.55; color:' + BRAND.gray700 + '; }',
-    '.qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:15px; color:' + BRAND.navy + '; margin-bottom:6px; }',
+    '.qc-welcome { font-family:Inter,sans-serif; font-size:14px; line-height:1.6; color:' + BRAND.gray700 + '; text-align:left; }',
+    '.qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:15px; color:' + BRAND.navy + '; margin-bottom:6px; text-align:left; }',
 
     /* ---------- QUICK ACTIONS ---------- */
     '.qc-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }',
     '.qc-action {',
     '  background:' + BRAND.white + '; color:' + BRAND.tealDark + ';',
     '  border:1.5px solid ' + BRAND.teal + '; border-radius:22px;',
-    '  padding:7px 14px; font-family:Inter,sans-serif; font-size:13px; font-weight:500;',
-    '  cursor:pointer; transition:all .2s; outline:none; white-space:nowrap;',
+    '  padding:8px 15px; font-family:Inter,sans-serif; font-size:13px; font-weight:500;',
+    '  cursor:pointer; transition:all .2s; outline:none; white-space:nowrap; text-align:center;',
     '}',
     '.qc-action:hover { background:' + BRAND.teal + '; color:' + BRAND.white + '; }',
 
@@ -112,18 +114,18 @@
 
     /* ---------- INPUT AREA ---------- */
     '.qc-input-area {',
-    '  padding:14px 16px; border-top:1px solid ' + BRAND.gray200 + '; display:flex; align-items:flex-end; gap:10px; background:' + BRAND.white + '; flex-shrink:0;',
+    '  padding:16px 16px 18px; border-top:1px solid ' + BRAND.gray200 + '; display:flex; align-items:flex-end; gap:10px; background:' + BRAND.white + '; flex-shrink:0;',
     '}',
     '.qc-textarea {',
-    '  flex:1; border:1.5px solid ' + BRAND.gray200 + '; border-radius:12px;',
-    '  padding:11px 14px; font-family:Inter,sans-serif; font-size:14px; color:' + BRAND.gray800 + ';',
-    '  background:' + BRAND.gray50 + '; outline:none; resize:none; min-height:44px; max-height:100px;',
-    '  overflow-y:auto; transition:border-color .2s; line-height:1.45;',
+    '  flex:1; border:1.5px solid ' + BRAND.gray200 + '; border-radius:14px;',
+    '  padding:14px 16px; font-family:Inter,sans-serif; font-size:15px; color:' + BRAND.gray800 + ';',
+    '  background:' + BRAND.gray50 + '; outline:none; resize:none; min-height:52px; max-height:120px;',
+    '  overflow-y:auto; transition:border-color .2s; line-height:1.5;',
     '}',
-    '.qc-textarea:focus { border-color:' + BRAND.teal + '; }',
-    '.qc-textarea::placeholder { color:' + BRAND.gray400 + '; }',
+    '.qc-textarea:focus { border-color:' + BRAND.teal + '; background:' + BRAND.white + '; }',
+    '.qc-textarea::placeholder { color:' + BRAND.gray400 + '; font-size:14px; }',
     '.qc-send {',
-    '  width:44px; height:44px; border-radius:12px; border:none;',
+    '  width:48px; height:48px; border-radius:14px; border:none;',
     '  background:linear-gradient(135deg,' + BRAND.teal + ',' + BRAND.tealDark + ');',
     '  cursor:pointer; display:flex; align-items:center; justify-content:center;',
     '  transition:transform .15s,opacity .2s; flex-shrink:0; outline:none;',
@@ -131,16 +133,17 @@
     '.qc-send:hover { transform:scale(1.05); }',
     '.qc-send:active { transform:scale(0.93); }',
     '.qc-send:disabled { opacity:.4; cursor:not-allowed; transform:none; }',
-    '.qc-send svg { width:20px; height:20px; fill:' + BRAND.white + '; }',
+    '.qc-send svg { width:22px; height:22px; fill:' + BRAND.white + '; }',
 
     /* ---------- MOBILE ---------- */
     '@media(max-width:480px){',
     '  #qarp-chat-popup { bottom:0; right:0; left:0; top:0; width:100vw; height:100vh; max-height:100vh; max-width:100vw; border-radius:0; position:fixed; }',
     '  #qarp-chat-popup .qc-messages { padding:12px; }',
-    '  #qarp-chat-popup .qc-input-area { padding:10px 12px 16px; padding-bottom:max(16px,env(safe-area-inset-bottom)); }',
-    '  #qarp-chat-popup .qc-textarea { font-size:16px; min-height:46px; }',
-    '  #qarp-chat-popup .qc-action { padding:9px 14px; font-size:14px; }',
-    '  #qarp-chat-popup .qc-msg { font-size:15px; padding:12px 16px; max-width:92%; }',
+    '  #qarp-chat-popup .qc-input-area { padding:12px 14px 20px; padding-bottom:max(20px,env(safe-area-inset-bottom)); }',
+    '  #qarp-chat-popup .qc-textarea { font-size:16px; min-height:54px; padding:14px 16px; border-radius:14px; }',
+    '  #qarp-chat-popup .qc-send { width:50px; height:50px; }',
+    '  #qarp-chat-popup .qc-action { padding:10px 15px; font-size:14px; }',
+    '  #qarp-chat-popup .qc-msg { font-size:15px; padding:12px 16px; max-width:92%; text-align:left; }',
     '  #qarp-chat-bubble { bottom:16px; right:16px; width:56px; height:56px; }',
     '  #qarp-chat-bubble.qopen { display:none; }',
     '}',
@@ -174,8 +177,8 @@
     '  <div class="qc-messages" id="qarp-messages">',
     '    <div class="qc-msg qc-msg-bot">',
     '      <div class="qc-welcome">',
-    '        <div class="qc-welcome-title">Welcome to The QARP Group!</div>',
-    '        I\'m your AI assistant. How can I help you today?',
+    '        <div class="qc-welcome-title">Welcome to The QARP!</div>',
+    '        How can I help you today? Choose a topic or type your question below.',
     '      </div>',
     '      <div class="qc-actions">',
     '        <button class="qc-action" data-msg="Tell me about your quality audit services">Audits & Compliance</button>',
@@ -189,7 +192,7 @@
     '  </div>',
 
     '  <div class="qc-input-area">',
-    '    <textarea class="qc-textarea" id="qarp-input" placeholder="Ask me anything about QARP..." rows="1"></textarea>',
+    '    <textarea class="qc-textarea" id="qarp-input" placeholder="Type your question here..." rows="1"></textarea>',
     '    <button class="qc-send" id="qarp-send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>',
     '  </div>',
 
@@ -239,7 +242,7 @@
 
   input.addEventListener('input', function() {
     this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
   });
 
   // ===== Helpers =====
@@ -264,6 +267,7 @@
   function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
   function fmt(text) {
+    // Handle markdown-style links [text](url)
     var segs = [], rx = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, last = 0, m;
     while ((m = rx.exec(text)) !== null) {
       if (m.index > last) segs.push({t:'t', c:text.slice(last, m.index)});
@@ -275,13 +279,24 @@
     var html = segs.map(function(s) {
       if (s.t === 'a') return '<a href="' + esc(s.u) + '" target="_blank" rel="noopener noreferrer">' + esc(s.l) + '</a>';
       var h = esc(s.c);
+      // Bold
       h = h.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Italic
       h = h.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      // Bullet lists: lines starting with "- " or "• "
+      h = h.replace(/^[\-•]\s+(.+)$/gm, '<li>$1</li>');
+      // Bare URLs
       h = h.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
       return h;
     }).join('');
 
+    // Wrap consecutive <li> items in <ul>
+    html = html.replace(/((?:<li>.*?<\/li>\s*)+)/g, '<ul>$1</ul>');
+    // Line breaks
     html = html.replace(/\n/g, '<br>');
+    // Clean up double breaks inside lists
+    html = html.replace(/<ul><br>/g, '<ul>');
+    html = html.replace(/<br><\/ul>/g, '</ul>');
     return html;
   }
 
