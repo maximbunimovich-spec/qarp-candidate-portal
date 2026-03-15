@@ -2318,6 +2318,11 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
     return res.sendStatus(204);
   });
 
+  // Health check endpoint (used by keep-alive self-ping)
+  app.get("/api/health", (_req: Request, res: Response) => {
+    return res.json({ status: "ok", ts: Date.now() });
+  });
+
   // Admin: export CSV
   app.get("/api/admin/export", (_req: Request, res: Response) => {
     const candidates = storage.getAllCandidates();
