@@ -1903,17 +1903,54 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
   app.post("/api/tilda-lead", async (req: Request, res: Response) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
 
-    // Tilda sends form data as flat object with field names
-    const data = req.body || {};
+    // Tilda sends form data as flat object — field names depend on form config
+    // Can be: {Name: "", Email: ""} or {"Input 1": "", ...} or nested {data: [...]}
+    let data = req.body || {};
     
-    // Extract common fields (Tilda field names vary)
-    const name = data.Name || data.name || data["Full Name"] || data.fullname || data["First Name"] || "";
-    const email = data.Email || data.email || data.EMAIL || "";
-    const phone = data.Phone || data.phone || data.tel || "";
-    const company = data.Company || data.company || data["Company Name"] || "";
-    const service = data.Service || data.service || data["Interest"] || data.interest || "";
-    const message = data.Message || data.message || data.Comments || data.comments || "";
-    const page = data.formid || data.page || data.Page || data["Form ID"] || data.tranid || "Unknown";
+    // Log raw payload for debugging
+    console.log(`[QARP Tilda] Raw payload keys:`, Object.keys(data));
+    console.log(`[QARP Tilda] Raw payload:`, JSON.stringify(data).slice(0, 500));
+
+    // Tilda sometimes sends as URL-encoded or as {data: [...]} array
+    // Flatten if Tilda sends array format: [{name: "field", value: "val"}, ...]
+    if (Array.isArray(data.data)) {
+      const flat: Record<string, string> = {};
+      data.data.forEach((item: any) => {
+        if (item && item.name) flat[item.name] = item.value || "";
+      });
+      // Preserve top-level fields like formid, tranid
+      if (data.formid) flat.formid = data.formid;
+      if (data.tranid) flat.tranid = data.tranid;
+      if (data.formname) flat.formname = data.formname;
+      data = flat;
+    }
+
+    // Extract common fields — Tilda uses many naming variants
+    const findField = (...keys: string[]): string => {
+      for (const key of keys) {
+        if (data[key]) return String(data[key]);
+      }
+      // Also search case-insensitively
+      const dataKeys = Object.keys(data);
+      for (const key of keys) {
+        const found = dataKeys.find(k => k.toLowerCase() === key.toLowerCase());
+        if (found && data[found]) return String(data[found]);
+      }
+      // Search for partial matches (e.g., "Your name" contains "name")
+      for (const key of keys) {
+        const found = dataKeys.find(k => k.toLowerCase().includes(key.toLowerCase()));
+        if (found && data[found]) return String(data[found]);
+      }
+      return "";
+    };
+
+    const name = findField("Name", "name", "Full Name", "fullname", "First Name", "firstname", "Your name", "Имя");
+    const email = findField("Email", "email", "EMAIL", "e-mail", "Your email", "Work email", "Почта");
+    const phone = findField("Phone", "phone", "tel", "telephone", "Телефон");
+    const company = findField("Company", "company", "Company Name", "Organization", "organisation", "Компания");
+    const service = findField("Service", "service", "Interest", "interest", "How can we help", "Услуга");
+    const message = findField("Message", "message", "Comments", "comments", "How can we help", "Сообщение");
+    const page = data.formid || data.formname || data.page || data.Page || data["Form ID"] || data.tranid || "Unknown";
 
     // Determine source page from Tilda's formid or any page hint
     let sourcePage = "Tilda Form";
