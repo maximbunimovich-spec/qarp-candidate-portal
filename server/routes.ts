@@ -1207,6 +1207,169 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     }
   });
 
+  // =============================================================
+  // --- QARP AI Chatbot (Public endpoint for website widget) ---
+  // =============================================================
+
+  // Serve the embeddable chat widget script
+  app.get("/chat-widget.js", (_req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Content-Type", "application/javascript");
+    res.setHeader("Cache-Control", "public, max-age=3600");
+    const widgetPath = path.join(process.cwd(), "chat-widget.js");
+    if (fs.existsSync(widgetPath)) {
+      return res.sendFile(widgetPath);
+    }
+    // Fallback: serve from dist if exists
+    const distPath = path.join(process.cwd(), "dist", "chat-widget.js");
+    if (fs.existsSync(distPath)) {
+      return res.sendFile(distPath);
+    }
+    return res.status(404).send("// Widget not found");
+  });
+
+  const QARP_SYSTEM_PROMPT = `You are QARP's AI assistant — a helpful, professional, and friendly chatbot embedded on The QARP Group website (theqarp.com).
+
+About The QARP Group:
+- Full name: The QARP Group S.L. — Quality Audit & Risk Prevention
+- Headquarters: Barcelona, Spain
+- Contact: +34 625 263 964, info@theqarp.com
+- Website: theqarp.com
+- Founded by Maxim Bunimovich, seasoned expert in quality management, auditing, and food safety
+- Completed 2,000+ audits worldwide, 1,400+ trainings, network of 100+ expert auditors
+- Operating across Europe, Latin America, Middle East, and Asia
+
+Core Services:
+1. **Quality Audits & Consulting** — Second-party and third-party audits for food safety, quality management, sustainability. Compliance with GFSI schemes (BRCGS, IFS, FSSC 22000, SQF), ISO standards (9001, 14001, 22000, 45001, 50001), SMETA/Sedex, and more. Pre-certification audits, gap analyses, supplier audits, mystery shopper audits.
+2. **The QARP Academy** — Professional training for auditors and quality professionals. Courses: Lead Auditor certifications (BRCGS, IFS, FSSC), Internal Auditor training, HACCP, food safety culture, sustainability auditing, risk assessment. Online and in-person formats. Certificates issued.
+3. **Auditor Recruitment & Network** — We recruit and connect qualified auditors with certification bodies and companies worldwide. Auditors can join our network through the Candidate Portal.
+4. **Consulting Services** — Implementation of quality management systems, food safety programs, HACCP plans, sustainability frameworks. Gap analysis and remediation support.
+
+Key Differentiators:
+- Multilingual team (English, Spanish, Russian, German, French, Portuguese, and more)
+- Global coverage with local expertise
+- Both digital and on-site delivery
+- Practical, results-oriented approach
+- Competitive pricing
+
+Important Links:
+- Book a consultation: https://calendly.com/maxim-bunimovich-theqarp/30min
+- Academy courses: theqarp.com (Academy section)
+- Auditor registration portal: qarp-candidate-portal.onrender.com
+- LinkedIn: linkedin.com/company/theqarp
+
+Behavior Rules:
+- Always respond in the SAME LANGUAGE the user writes in (English, Spanish, Russian, etc.)
+- Be concise but helpful. 2-4 sentences for simple questions, more detail when asked
+- For pricing questions: suggest booking a free consultation call via Calendly
+- For auditor recruitment: direct to the Candidate Portal
+- For course inquiries: describe available programs and suggest booking a call for details
+- If unsure about specific details, say you'll connect them with the team and suggest the Calendly link
+- Never make up specific prices, dates, or details you don't know
+- Be warm and professional — represent QARP's expertise and reliability
+- If asked about topics unrelated to QARP's services, politely redirect to how QARP can help them
+- Use markdown formatting sparingly (bold for emphasis, links when relevant)`;
+
+  // In-memory chat sessions (conversation history per session)
+  const chatSessions: Map<string, Array<{role: string; content: string}>> = new Map();
+
+  // Cleanup old sessions every 30 minutes
+  setInterval(() => {
+    chatSessions.clear();
+  }, 30 * 60 * 1000);
+
+  // CORS middleware for chatbot endpoint (allows embedding from any domain)
+  app.options("/api/chatbot", (_req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.setHeader("Access-Control-Max-Age", "86400");
+    return res.status(204).send("");
+  });
+
+  app.post("/api/chatbot", async (req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    const { message, sessionId } = req.body;
+    if (!message || typeof message !== "string" || message.trim().length === 0) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+    if (message.length > 2000) {
+      return res.status(400).json({ error: "Message too long (max 2000 chars)" });
+    }
+
+    const ai = getGeminiClient();
+    if (!ai) {
+      return res.status(503).json({ error: "AI service unavailable" });
+    }
+
+    // Get or create session history
+    const sid = sessionId || `session_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    if (!chatSessions.has(sid)) {
+      chatSessions.set(sid, []);
+    }
+    const history = chatSessions.get(sid)!;
+
+    // Add user message
+    history.push({ role: "user", content: message.trim() });
+
+    // Keep only last 20 messages to prevent context overflow
+    if (history.length > 20) {
+      history.splice(0, history.length - 20);
+    }
+
+    // Build Gemini messages
+    const geminiContents = history.map(msg => ({
+      role: msg.role === "user" ? "user" as const : "model" as const,
+      parts: [{ text: msg.content }]
+    }));
+
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        config: {
+          systemInstruction: QARP_SYSTEM_PROMPT,
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        },
+        contents: geminiContents,
+      });
+
+      const reply = response?.text || "I'm sorry, I couldn't generate a response. Please try again or contact us at info@theqarp.com.";
+
+      // Add assistant response to history
+      history.push({ role: "assistant", content: reply });
+
+      return res.json({ reply, sessionId: sid });
+    } catch (err: any) {
+      console.error("[QARP Chatbot] Gemini error:", err.message);
+
+      // Fallback to lighter model
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash-lite",
+          config: {
+            systemInstruction: QARP_SYSTEM_PROMPT,
+            temperature: 0.7,
+            maxOutputTokens: 1024,
+          },
+          contents: geminiContents,
+        });
+
+        const reply = response?.text || "I'm sorry, I couldn't generate a response. Please try again or contact us at info@theqarp.com.";
+        history.push({ role: "assistant", content: reply });
+        return res.json({ reply, sessionId: sid });
+      } catch (err2: any) {
+        console.error("[QARP Chatbot] Fallback model error:", err2.message);
+        return res.status(500).json({
+          error: "I'm temporarily unavailable. Please contact us directly at info@theqarp.com or call +34 625 263 964."
+        });
+      }
+    }
+  });
+
   // Admin: export CSV
   app.get("/api/admin/export", (_req: Request, res: Response) => {
     const candidates = storage.getAllCandidates();
