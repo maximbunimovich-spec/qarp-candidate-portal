@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { User, Upload, ClipboardList, CheckCircle2, Circle, LogOut, FileText, GraduationCap, Bot, Sparkles, ExternalLink, Wand2 } from "lucide-react";
-import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 
 export default function DashboardPage() {
   const { candidate, logout } = useAuth();
@@ -239,7 +238,6 @@ export default function DashboardPage() {
       <footer className="border-t border-border/50 px-6 py-4 mt-8">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>QARP-Q-SUR-02-01-01, ver 1.0</span>
-          <PerplexityAttribution />
         </div>
       </footer>
     </div>
