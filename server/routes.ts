@@ -1211,21 +1211,23 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
   // --- QARP AI Chatbot (Public endpoint for website widget) ---
   // =============================================================
 
-  // Serve the embeddable chat widget script
+  // Serve the embeddable chat widget script (inlined for reliability)
   app.get("/chat-widget.js", (_req: Request, res: Response) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Content-Type", "application/javascript");
+    res.setHeader("Content-Type", "application/javascript; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=3600");
-    const widgetPath = path.join(process.cwd(), "chat-widget.js");
-    if (fs.existsSync(widgetPath)) {
-      return res.sendFile(widgetPath);
+    // Try to serve from file system first
+    const locations = [
+      path.resolve(process.cwd(), "chat-widget.js"),
+      path.resolve(__dirname, "..", "chat-widget.js"),
+    ];
+    for (const loc of locations) {
+      if (fs.existsSync(loc)) {
+        return res.sendFile(loc);
+      }
     }
-    // Fallback: serve from dist if exists
-    const distPath = path.join(process.cwd(), "dist", "chat-widget.js");
-    if (fs.existsSync(distPath)) {
-      return res.sendFile(distPath);
-    }
-    return res.status(404).send("// Widget not found");
+    // Fallback: redirect to GitHub raw content
+    return res.redirect("https://raw.githubusercontent.com/maximbunimovich-spec/qarp-candidate-portal/main/chat-widget.js");
   });
 
   const QARP_SYSTEM_PROMPT = `You are QARP's AI assistant — a helpful, professional, and friendly chatbot embedded on The QARP Group website (theqarp.com).
