@@ -9,6 +9,7 @@ import * as path from "path";
 import { google } from "googleapis";
 import nodemailer from "nodemailer";
 import { GoogleGenAI } from "@google/genai";
+import { generateQARPCVPdf } from "./generatePdf";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -28,6 +29,17 @@ const upload = multer({
 });
 
 const ADMIN_PASSWORD = "qarp2026admin";
+
+// QARP CV Template naming convention
+const QARP_CV_TEMPLATE_CODE = 'QARP-Q-TEM-02-00-01';
+const QARP_CV_TEMPLATE_NAME = 'The QARP Curriculum Vitae (CV)';
+const QARP_CV_TEMPLATE_VERSION = 'v 3.0';
+
+// Generate QARP CV filename: QARP-Q-TEM-02-00-01_The QARP Curriculum Vitae (CV)_v 3.0_FirstName_LastName_YYYY-MM-DD.pdf
+function qarpCvFilename(candidateName: string, dateStr: string, ext = 'pdf'): string {
+  const safeName = candidateName.replace(/[^a-zA-Z0-9 ._-]/g, '').replace(/\s+/g, '_');
+  return `${QARP_CV_TEMPLATE_CODE}_${QARP_CV_TEMPLATE_NAME}_${QARP_CV_TEMPLATE_VERSION}_${safeName}_${dateStr}.${ext}`;
+}
 const SPREADSHEET_ID = "1NPR2NHHXHrc-YWNIZfyUfTwBdBiBNlGZG0MjGRp4BTA";
 const SHEET_NAME = "Sheet1"; // Adjust if your sheet has a different name
 
@@ -526,13 +538,18 @@ Your task is to generate a structured QARP-format CV in JSON format with these e
 }
 
 IMPORTANT RULES:
-- Extract ALL relevant information from both the uploaded CV and the questionnaire data
-- Use professional, formal English language
-- For the summary, emphasize GxP auditing and quality assurance expertise
-- Map questionnaire audit types to areas of expertise
-- Include questionnaire data (audit counts, rates, locations, languages) in appropriate sections
-- If information is missing, omit the field rather than making things up
-- Keep the tone professional and aligned with pharmaceutical industry standards
+- The UPLOADED CV TEXT is the PRIMARY source of information. Extract employment history, education, trainings, skills, and detailed experience from it.
+- The QUESTIONNAIRE DATA supplements the CV with structured audit/consulting/training preferences and rates.
+- The PROFILE provides contact details and name.
+- MERGE all three sources intelligently: if the CV mentions 15 years of GCP auditing experience and the questionnaire says "50+ audits", combine both facts.
+- For employmentHistory: extract EVERY job from the uploaded CV with full details (employer, role, period, responsibilities). Do NOT skip jobs.
+- For education: extract ALL degrees, universities, and dates from the uploaded CV.
+- For trainingsAndCourses: extract ALL certifications, courses, and professional development from the CV.
+- For areasOfExpertise: combine CV expertise with questionnaire audit types and branch expertise.
+- For summary: write a compelling 2-3 sentence professional summary using the BEST information from both the CV and questionnaire.
+- Use professional, formal English language.
+- If information is missing from BOTH sources, omit the field rather than making things up.
+- Keep the tone professional and aligned with pharmaceutical industry standards.
 - Return ONLY valid JSON, no markdown formatting`;
 
 // Repair common JSON issues produced by LLMs
@@ -737,6 +754,8 @@ const generatedCVs: Map<string, any> = new Map();
 // Format QARP CV data as structured plain text (for Google Docs upload)
 function formatQARPCVAsText(cv: any): string {
   const lines: string[] = [];
+  lines.push(`${QARP_CV_TEMPLATE_CODE}_${QARP_CV_TEMPLATE_NAME}_${QARP_CV_TEMPLATE_VERSION}`);
+  lines.push('');
   lines.push('CURRICULUM VITAE');
   lines.push('');
   lines.push(cv.fullName || '');
@@ -1112,7 +1131,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     return res.json({ qarpCV });
   });
 
-  // Submit generated QARP CV to QARP (upload PDF to Drive + notify)
+  // Submit generated QARP CV to QARP (generate PDF, upload to Drive + notify)
   app.post("/api/candidates/:id/submit-qarp-cv", async (req: Request, res: Response) => {
     try {
       const candidate = storage.getCandidateById(req.params.id);
@@ -1121,51 +1140,113 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       const qarpCV = generatedCVs.get(candidate.id);
       if (!qarpCV) return res.status(400).json({ error: "No generated CV found. Please generate first." });
 
-      // Generate a simple HTML -> text representation for the PDF
       const candidateName = qarpCV.fullName || candidate.profile?.fullName || candidate.email;
-      const safeName = candidateName.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const fileName = qarpCvFilename(candidateName, dateStr, 'pdf');
+      const pdfOutputPath = `/tmp/${fileName}`;
+      let pdfBuffer: Buffer | null = null;
 
-      // Upload the QARP CV JSON data to Drive as a formatted text file
+      // Step 1: Generate PDF using Node.js PDFKit (no Python dependency)
+      try {
+        await generateQARPCVPdf(qarpCV, pdfOutputPath);
+        pdfBuffer = fs.readFileSync(pdfOutputPath);
+        console.log(`[QARP] PDF generated for ${candidate.email}: ${fileName} (${pdfBuffer.length} bytes)`);
+      } catch (pdfErr: any) {
+        console.error('[QARP] PDF generation error:', pdfErr.message);
+        // Fall back to text upload if PDF fails
+      }
+
+      // Step 2: Upload PDF to Google Drive (fall back to text if PDF failed)
       const drive = getDriveClient();
       let driveLink: string | null = null;
 
       if (drive) {
         try {
-          const cvContent = formatQARPCVAsText(qarpCV);
           const { Readable } = await import('stream');
-          const stream = new Readable();
-          stream.push(Buffer.from(cvContent, 'utf-8'));
-          stream.push(null);
 
-          const response = await drive.files.create({
-            requestBody: {
-              name: `QARP_CV_${safeName}_${new Date().toISOString().slice(0,10)}.txt`,
-              parents: [DRIVE_FOLDER_ID],
-              mimeType: 'application/vnd.google-apps.document', // Convert to Google Doc
-            },
-            media: {
-              mimeType: 'text/plain',
-              body: stream,
-            },
-            supportsAllDrives: true,
-            fields: 'id, webViewLink',
-          });
+          if (pdfBuffer) {
+            // Upload as PDF (preferred)
+            const stream = new Readable();
+            stream.push(pdfBuffer);
+            stream.push(null);
 
-          driveLink = response.data.webViewLink || `https://drive.google.com/file/d/${response.data.id}/view`;
-          console.log(`[QARP] QARP CV uploaded to Drive for ${candidate.email}: ${driveLink}`);
+            const response = await drive.files.create({
+              requestBody: {
+                name: fileName,
+                parents: [DRIVE_FOLDER_ID],
+              },
+              media: {
+                mimeType: 'application/pdf',
+                body: stream,
+              },
+              supportsAllDrives: true,
+              fields: 'id, webViewLink',
+            });
+
+            driveLink = response.data.webViewLink || `https://drive.google.com/file/d/${response.data.id}/view`;
+            console.log(`[QARP] QARP CV PDF uploaded to Drive for ${candidate.email}: ${driveLink}`);
+          } else {
+            // Fallback: upload as Google Doc
+            const cvContent = formatQARPCVAsText(qarpCV);
+            const txtFileName = qarpCvFilename(candidateName, dateStr, 'txt');
+            const stream = new Readable();
+            stream.push(Buffer.from(cvContent, 'utf-8'));
+            stream.push(null);
+
+            const response = await drive.files.create({
+              requestBody: {
+                name: txtFileName,
+                parents: [DRIVE_FOLDER_ID],
+                mimeType: 'application/vnd.google-apps.document',
+              },
+              media: {
+                mimeType: 'text/plain',
+                body: stream,
+              },
+              supportsAllDrives: true,
+              fields: 'id, webViewLink',
+            });
+
+            driveLink = response.data.webViewLink || `https://drive.google.com/file/d/${response.data.id}/view`;
+            console.log(`[QARP] QARP CV (text fallback) uploaded to Drive for ${candidate.email}: ${driveLink}`);
+          }
         } catch (err: any) {
           console.error('[QARP] Drive upload error for QARP CV:', err.message);
         }
       }
 
-      // Send notification email
-      const driveLine = driveLink ? `\nQARP CV (Google Drive): ${driveLink}` : '';
-      await sendNotificationEmail(
-        `[QARP Portal] QARP CV Submitted: ${candidateName}`,
-        `A candidate has approved and submitted their AI-generated QARP CV.\n\nName: ${candidateName}\nEmail: ${candidate.email}\nLocation: ${qarpCV.location || 'N/A'}\nLanguages: ${qarpCV.languages || 'N/A'}\nMemberships: ${qarpCV.memberships || 'N/A'}${driveLine}\n\nSummary: ${qarpCV.summary || 'N/A'}\n\nAreas of Expertise: ${(qarpCV.areasOfExpertise || []).join(', ')}\n\nFull QARP CV is available in the Google Drive folder.`
-      );
+      // Clean up PDF temp file
+      try { fs.unlinkSync(pdfOutputPath); } catch {}
 
-      return res.json({ success: true, driveLink });
+      // Step 3: Send notification email (attach PDF if available)
+      const driveLine = driveLink ? `\nQARP CV (Google Drive): ${driveLink}` : '';
+      const transporter = getEmailTransporter();
+      if (transporter) {
+        try {
+          const fromUser = process.env.GMAIL_USER || 'noreply@theqarp.com';
+          const attachments: any[] = [];
+          if (pdfBuffer) {
+            attachments.push({
+              filename: fileName,
+              content: pdfBuffer,
+              contentType: 'application/pdf',
+            });
+          }
+
+          await transporter.sendMail({
+            from: `"QARP Portal" <${fromUser}>`,
+            to: NOTIFY_EMAILS.join(', '),
+            subject: `[QARP Portal] QARP CV Submitted: ${candidateName}`,
+            text: `A candidate has approved and submitted their AI-generated QARP CV.\n\nName: ${candidateName}\nEmail: ${candidate.email}\nLocation: ${qarpCV.location || 'N/A'}\nLanguages: ${qarpCV.languages || 'N/A'}\nMemberships: ${qarpCV.memberships || 'N/A'}${driveLine}\n\nSummary: ${qarpCV.summary || 'N/A'}\n\nAreas of Expertise: ${(qarpCV.areasOfExpertise || []).join(', ')}\n\n${pdfBuffer ? 'PDF is attached and also available in the Google Drive folder.' : 'Full QARP CV is available in the Google Drive folder.'}`,
+            attachments,
+          });
+          console.log(`[QARP] CV notification sent for ${candidate.email}`);
+        } catch (emailErr: any) {
+          console.error('[QARP] Email error:', emailErr.message);
+        }
+      }
+
+      return res.json({ success: true, driveLink, hasPdf: !!pdfBuffer, fileName });
     } catch (err: any) {
       console.error('[QARP] Submit QARP CV error:', err.message);
       return res.status(500).json({ error: err.message });
