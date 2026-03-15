@@ -12,7 +12,6 @@ import { Lock, Download, ArrowLeft, CheckCircle2, XCircle, Eye, FileDown, Users 
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Candidate } from "@shared/schema";
-import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 
 const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
 
@@ -416,7 +415,6 @@ export default function AdminPage() {
       <footer className="border-t border-border/50 px-6 py-4 mt-8">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>QARP Admin Panel — Confidential</span>
-          <PerplexityAttribution />
         </div>
       </footer>
     </div>
