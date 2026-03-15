@@ -1949,18 +1949,37 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
     const phone = findField("Phone", "phone", "tel", "telephone", "Телефон");
     const company = findField("Company", "company", "Company Name", "Organization", "organisation", "Компания");
     const service = findField("Service", "service", "Interest", "interest", "How can we help", "Услуга");
-    const message = findField("Message", "message", "Comments", "comments", "How can we help", "Сообщение");
-    const page = data.formid || data.formname || data.page || data.Page || data["Form ID"] || data.tranid || "Unknown";
+    const message = findField("Message", "message", "Input", "Comments", "comments", "How can we help", "Сообщение", "Textarea", "textarea");
+    const formId = data.formid || data.formname || "";
+    const tranId = data.tranid || "";
 
-    // Determine source page from Tilda's formid or any page hint
+    // Determine source page from HTTP Referer (most reliable) or formid
+    const referer = req.headers['referer'] || req.headers['origin'] || "";
     let sourcePage = "Tilda Form";
-    const pageStr = String(page).toLowerCase();
-    if (pageStr.includes("enterprise") || pageStr.includes("ai")) sourcePage = "Enterprise AI";
-    else if (pageStr.includes("audit") && pageStr.includes("school")) sourcePage = "Auditor School";
-    else if (pageStr.includes("audit")) sourcePage = "GxP Auditing";
-    else if (pageStr.includes("consult")) sourcePage = "GxP Consulting";
-    else if (pageStr.includes("train")) sourcePage = "GxP Training";
-    else if (pageStr.includes("contact")) sourcePage = "Contact Us";
+    const refLower = String(referer).toLowerCase();
+    const formIdLower = String(formId).toLowerCase();
+    
+    // Check referer URL path for page identification
+    if (refLower.includes("/enterprise") || refLower.includes("/enterprise-ai")) sourcePage = "Enterprise AI";
+    else if (refLower.includes("/auditor_school") || refLower.includes("/auditor-school")) sourcePage = "Auditor School";
+    else if (refLower.includes("/audit")) sourcePage = "GxP Auditing";
+    else if (refLower.includes("/consult")) sourcePage = "GxP Consulting";
+    else if (refLower.includes("/train")) sourcePage = "GxP Training";
+    else if (refLower.includes("/contact")) sourcePage = "Contact Us";
+    else if (refLower.includes("/academy") || refLower.includes("/courses")) sourcePage = "Academy";
+    else if (refLower.includes("/webinar")) sourcePage = "Webinars";
+    else if (refLower.includes("/careers") || refLower.includes("/jobs")) sourcePage = "Careers";
+    // Fallback: try formid if referer didn't match
+    else if (formIdLower.includes("enterprise") || formIdLower.includes("ai")) sourcePage = "Enterprise AI";
+    else if (formIdLower.includes("audit") && formIdLower.includes("school")) sourcePage = "Auditor School";
+    else if (formIdLower.includes("audit")) sourcePage = "GxP Auditing";
+    else if (formIdLower.includes("consult")) sourcePage = "GxP Consulting";
+    else if (formIdLower.includes("train")) sourcePage = "GxP Training";
+    else if (formIdLower.includes("contact")) sourcePage = "Contact Us";
+    // Last resort: use the referer domain/path as-is
+    else if (referer) {
+      try { sourcePage = new URL(String(referer)).pathname.replace(/^\//,'').replace(/\//g,' › ') || "Homepage"; } catch { }
+    }
 
     // Quick lead score based on available info
     let leadScore = "🟡 Warm";
@@ -1969,7 +1988,7 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
       leadScore = "🔥 Hot";
     }
 
-    console.log(`[QARP Tilda] New lead from ${sourcePage}: ${name} <${email}>`);
+    console.log(`[QARP Tilda] New lead from ${sourcePage}: ${name} <${email}> (referer: ${referer}, formid: ${formId})`);
 
     // Log to Google Sheets — "Tilda Leads" tab
     try {
@@ -2004,11 +2023,15 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
           }
         }
 
-        // Also capture raw field dump for debugging
-        const rawFields = Object.entries(data)
+        // Also capture raw field dump for debugging (include referer + formid)
+        const rawParts: string[] = [];
+        if (referer) rawParts.push(`referer: ${referer}`);
+        if (formId) rawParts.push(`formid: ${formId}`);
+        if (tranId) rawParts.push(`tranid: ${tranId}`);
+        Object.entries(data)
           .filter(([k]) => !['formid','tranid','formname'].includes(k))
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(' | ');
+          .forEach(([k, v]) => rawParts.push(`${k}: ${v}`));
+        const rawFields = rawParts.join(' | ');
 
         await sheets.spreadsheets.values.append({
           spreadsheetId: SPREADSHEET_ID,
