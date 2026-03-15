@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import { storage, verifyPassword } from "./storage";
+import { storage, verifyPassword, hashPassword } from "./storage";
 import { registerSchema, loginSchema, adminLoginSchema, profileSchema, questionnaireSchema } from "@shared/schema";
 import { execSync } from "child_process";
 import * as fs from "fs";
@@ -852,6 +852,69 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         return res.status(401).json({ error: "Incorrect password. Please try again." });
       }
       return res.json(safeCandidate(candidate));
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Password reset — sends a temporary password via email
+  app.post("/api/candidates/reset-password", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({ error: "Please provide a valid email address." });
+      }
+
+      const candidate = storage.getCandidateByEmail(email);
+      if (!candidate) {
+        // Don't reveal whether email exists — always return success
+        return res.json({ success: true, message: "If an account exists with this email, a password reset email has been sent." });
+      }
+
+      // Generate temporary password
+      const tempPassword = 'QARP-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      const updated = storage.updatePassword(email, hashPassword(tempPassword));
+
+      if (!updated) {
+        return res.json({ success: true, message: "If an account exists with this email, a password reset email has been sent." });
+      }
+
+      // Send email with temporary password
+      const transporter = getEmailTransporter();
+      if (transporter) {
+        try {
+          await transporter.sendMail({
+            from: `"The QARP" <${process.env.GMAIL_USER}>`,
+            to: email,
+            subject: "[The QARP] Password Reset",
+            html: `
+              <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
+                <div style="background: linear-gradient(135deg, #0B1120 0%, #1a2744 100%); padding: 32px 24px; text-align: center;">
+                  <h1 style="color: #ffffff; font-size: 22px; margin: 0;">The QARP</h1>
+                  <p style="color: #00B4D8; font-size: 13px; margin: 6px 0 0;">Password Reset</p>
+                </div>
+                <div style="padding: 32px 24px;">
+                  <p style="color: #1f2937; font-size: 14px; line-height: 1.6;">Hello,</p>
+                  <p style="color: #1f2937; font-size: 14px; line-height: 1.6;">You requested a password reset for your QARP Candidate Portal account. Your temporary password is:</p>
+                  <div style="background: #f0f9ff; border: 2px solid #00B4D8; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0;">
+                    <p style="font-family: monospace; font-size: 24px; font-weight: 700; color: #0B1120; margin: 0; letter-spacing: 2px;">${tempPassword}</p>
+                  </div>
+                  <p style="color: #1f2937; font-size: 14px; line-height: 1.6;">Use this password to sign in. We recommend changing it after logging in.</p>
+                  <p style="color: #6b7280; font-size: 12px; line-height: 1.6; margin-top: 24px;">If you did not request a password reset, please ignore this email.</p>
+                </div>
+                <div style="background: #f9fafb; padding: 16px 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+                  <p style="color: #9ca3af; font-size: 11px; margin: 0;">The QARP &mdash; Quality Assurance Research Professionals</p>
+                </div>
+              </div>
+            `,
+          });
+          console.log(`[QARP] Password reset email sent to ${email}`);
+        } catch (emailErr: any) {
+          console.error('[QARP] Password reset email error:', emailErr.message);
+        }
+      }
+
+      return res.json({ success: true, message: "If an account exists with this email, a password reset email has been sent." });
     } catch (err: any) {
       return res.status(500).json({ error: err.message });
     }
