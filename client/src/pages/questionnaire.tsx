@@ -205,7 +205,7 @@ export default function QuestionnairePage() {
                   <span className="text-foreground font-medium">I agree to The QARP Privacy Policy *</span>
                   <p className="text-muted-foreground text-xs mt-1">
                     Please click{" "}
-                    <a href="https://theqarp.com/privacy_policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    <a href="https://theqarpacademy.pro/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                       this link
                     </a>{" "}
                     to see The QARP Privacy Policy, so that you know how we will operate with your data and protect them.
