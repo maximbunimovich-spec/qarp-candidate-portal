@@ -1995,7 +1995,7 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
               range: `'${TILDA_SHEET}'!A1:I1`,
               valueInputOption: "RAW",
               requestBody: {
-                values: [["Timestamp", "Name", "Email", "Phone", "Company", "Source Page", "Lead Score", "Service/Interest", "Message"]]
+                values: [["Timestamp", "Name", "Email", "Phone", "Company", "Source Page", "Lead Score", "Service/Interest", "Message", "Raw Fields"]]
               }
             });
             console.log(`[QARP Tilda] Created '${TILDA_SHEET}' sheet`);
@@ -2004,9 +2004,15 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
           }
         }
 
+        // Also capture raw field dump for debugging
+        const rawFields = Object.entries(data)
+          .filter(([k]) => !['formid','tranid','formname'].includes(k))
+          .map(([k, v]) => `${k}: ${v}`)
+          .join(' | ');
+
         await sheets.spreadsheets.values.append({
           spreadsheetId: SPREADSHEET_ID,
-          range: `'${TILDA_SHEET}'!A:I`,
+          range: `'${TILDA_SHEET}'!A:J`,
           valueInputOption: "RAW",
           requestBody: {
             values: [[
@@ -2018,7 +2024,8 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
               sourcePage,
               leadScore,
               service,
-              message
+              message,
+              rawFields
             ]]
           }
         });
@@ -2097,6 +2104,27 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
 
     // Tilda expects 200 OK
     return res.json({ success: true });
+  });
+
+  // Debug endpoint to see raw Tilda payloads
+  app.post("/api/tilda-debug", (req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    const raw = {
+      headers: {
+        'content-type': req.headers['content-type'],
+        'user-agent': req.headers['user-agent'],
+      },
+      body: req.body,
+      bodyKeys: Object.keys(req.body || {}),
+    };
+    console.log(`[QARP Tilda Debug]`, JSON.stringify(raw));
+    return res.json(raw);
+  });
+  app.options("/api/tilda-debug", (_req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.sendStatus(204);
   });
 
   // Also handle OPTIONS for CORS preflight
