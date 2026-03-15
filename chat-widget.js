@@ -279,7 +279,7 @@
         <input class="qc-gate-input" id="qarp-gate-email" type="email" placeholder="Work email" autocomplete="email">
         <div class="qc-gate-privacy">
           <input type="checkbox" id="qarp-gate-privacy">
-          <label for="qarp-gate-privacy">I agree to the <a href="https://theqarp.com/privacy" target="_blank">Privacy Policy</a> and consent to receive follow-up communications from The QARP.</label>
+          <label for="qarp-gate-privacy">I agree to the <a href="https://theqarpacademy.pro/privacy" target="_blank">Privacy Policy</a> and consent to receive follow-up communications from The QARP.</label>
         </div>
         <button class="qc-gate-btn" id="qarp-gate-submit">Start Chat</button>
         <div class="qc-gate-err" id="qarp-gate-err" style="display:none"></div>
