@@ -1246,6 +1246,7 @@ Core Services:
 2. **The QARP Academy** — Professional training for auditors and quality professionals. Courses: Lead Auditor certifications (BRCGS, IFS, FSSC), Internal Auditor training, HACCP, food safety culture, sustainability auditing, risk assessment. Online and in-person formats. Certificates issued.
 3. **Auditor Recruitment & Network** — We recruit and connect qualified auditors with certification bodies and companies worldwide. Auditors can join our network through the Candidate Portal.
 4. **Consulting Services** — Implementation of quality management systems, food safety programs, HACCP plans, sustainability frameworks. Gap analysis and remediation support.
+5. **Enterprise AI** — AI-powered compliance tools for pharma and biotech companies. SOP management, CAPA workflows, document control, AI audit assistance, and intelligent compliance monitoring. Custom AI solutions for quality management and regulatory compliance.
 
 Key Differentiators:
 - Multilingual team (English, Spanish, Russian, German, French, Portuguese, and more)
@@ -1256,7 +1257,9 @@ Key Differentiators:
 
 Important Links:
 - Book a consultation: https://calendly.com/maxim-bunimovich-theqarp/30min
-- Academy courses: theqarp.com (Academy section)
+- Academy platform & courses: https://theqarpacademy.pro
+- Academy info on main site: theqarp.com (Academy section)
+- Enterprise AI: theqarp.com/enterprise-ai
 - Auditor registration portal: qarp-candidate-portal.onrender.com
 - LinkedIn: linkedin.com/company/theqarp
 
