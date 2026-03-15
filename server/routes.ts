@@ -1137,8 +1137,17 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       const candidate = storage.getCandidateById(req.params.id);
       if (!candidate) return res.status(404).json({ error: "Candidate not found" });
 
-      const qarpCV = generatedCVs.get(candidate.id);
+      // Use edited CV from request body if provided, otherwise fall back to in-memory generated version
+      const editedCV = req.body?.editedCV;
+      const storedCV = generatedCVs.get(candidate.id);
+      const qarpCV = editedCV || storedCV;
       if (!qarpCV) return res.status(400).json({ error: "No generated CV found. Please generate first." });
+
+      // If edited version was submitted, also update the stored version
+      if (editedCV) {
+        generatedCVs.set(candidate.id, editedCV);
+        console.log(`[QARP] Using manually edited CV for ${candidate.email}`);
+      }
 
       const candidateName = qarpCV.fullName || candidate.profile?.fullName || candidate.email;
       const dateStr = new Date().toISOString().slice(0, 10);
