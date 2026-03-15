@@ -371,6 +371,34 @@ async function sendWelcomeEmail(candidateEmail: string): Promise<void> {
               </tr>
             </table>
 
+            <!-- Auditing Services -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
+            <h3 style="font-size: 16px; color: #0B1120; margin-bottom: 8px;">GxP Auditing Services</h3>
+            <p style="font-size: 13px; color: #4b5563;">The QARP provides <strong>independent GxP auditing services</strong> across all phases of pharmaceutical and biotech development. Our senior auditors deliver inspection-ready compliance assessments worldwide:</p>
+            <ul style="font-size: 13px; color: #4b5563; line-height: 2; padding-left: 20px;">
+              <li><strong>GCP Audits</strong> &mdash; investigator site audits, sponsor/CRO system audits, TMF audits, computerised system audits</li>
+              <li><strong>GLP &amp; GMP Audits</strong> &mdash; laboratory audits, manufacturing facility audits, supplier/vendor qualification</li>
+              <li><strong>GDP &amp; GVP Audits</strong> &mdash; distribution chain audits, pharmacovigilance system audits</li>
+              <li><strong>Regulatory Inspection Readiness</strong> &mdash; mock inspections, gap analysis, CAPA follow-up</li>
+            </ul>
+            <div style="text-align: center; margin: 16px 0;">
+              <a href="https://theqarp.com/auditing" style="color: #00B4D8; font-weight: 600; text-decoration: none; font-size: 13px;">Learn about Auditing Services &rarr;</a>
+            </div>
+
+            <!-- Consulting Services -->
+            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
+            <h3 style="font-size: 16px; color: #0B1120; margin-bottom: 8px;">QA Consulting</h3>
+            <p style="font-size: 13px; color: #4b5563;">Our consultants help organisations <strong>build, optimise, and maintain quality management systems</strong> aligned with GxP requirements and regulatory expectations:</p>
+            <ul style="font-size: 13px; color: #4b5563; line-height: 2; padding-left: 20px;">
+              <li><strong>QMS Development &amp; Improvement</strong> &mdash; SOP writing, process mapping, quality system gap analysis</li>
+              <li><strong>Regulatory Strategy</strong> &mdash; submission support, inspection readiness, compliance roadmaps</li>
+              <li><strong>Data Integrity &amp; CSV</strong> &mdash; computerised system validation, data governance frameworks</li>
+              <li><strong>Outsourced QA</strong> &mdash; dedicated quality assurance professionals on a project or retainer basis</li>
+            </ul>
+            <div style="text-align: center; margin: 16px 0;">
+              <a href="https://theqarp.com/consulting" style="color: #00B4D8; font-weight: 600; text-decoration: none; font-size: 13px;">Learn about Consulting Services &rarr;</a>
+            </div>
+
             <!-- Academy -->
             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 28px 0;" />
             <h3 style="font-size: 16px; color: #0B1120; margin-bottom: 8px;">The QARP Academy</h3>
