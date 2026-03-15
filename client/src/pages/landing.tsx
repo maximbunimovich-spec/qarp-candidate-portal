@@ -271,7 +271,7 @@ export default function LandingPage() {
                   <p className="text-xs text-muted-foreground text-center">
                     By continuing, you agree to The QARP{" "}
                     <a
-                      href="https://theqarp.com/privacy_policy"
+                      href="https://theqarpacademy.pro/privacy"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline"
