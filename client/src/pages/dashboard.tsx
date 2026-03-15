@@ -5,10 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { User, Upload, ClipboardList, CheckCircle2, Circle, LogOut, FileText, GraduationCap, Bot, Sparkles, ExternalLink, Wand2 } from "lucide-react";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
-  const { candidate, logout } = useAuth();
+  const { candidate, logout, refreshCandidate } = useAuth();
   const [, setLocation] = useLocation();
+
+  // Refresh candidate data from server on mount
+  useEffect(() => {
+    refreshCandidate();
+  }, []);
 
   if (!candidate) {
     setLocation("/");
