@@ -558,17 +558,39 @@
   }
 
   function formatMarkdown(text) {
-    // Simple markdown: bold, links, line breaks
-    var html = escapeHtml(text);
-    // Bold: **text**
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    // Links: [text](url)
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-    // Bare URLs
-    html = html.replace(/((?:https?:\/\/)[^\s<]+)/g, function(match) {
-      if (match.indexOf('href="') > -1) return match;
-      return '<a href="' + match + '" target="_blank" rel="noopener noreferrer">' + match + '</a>';
-    });
+    // Simple markdown: bold, italic, links, lists, line breaks
+    // First, process links BEFORE escaping (to preserve URLs)
+    var segments = [];
+    var linkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+    var lastIdx = 0;
+    var match;
+    while ((match = linkRegex.exec(text)) !== null) {
+      if (match.index > lastIdx) {
+        segments.push({ type: 'text', content: text.slice(lastIdx, match.index) });
+      }
+      segments.push({ type: 'link', label: match[1], url: match[2] });
+      lastIdx = match.index + match[0].length;
+    }
+    if (lastIdx < text.length) {
+      segments.push({ type: 'text', content: text.slice(lastIdx) });
+    }
+
+    var html = segments.map(function(seg) {
+      if (seg.type === 'link') {
+        return '<a href="' + escapeHtml(seg.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(seg.label) + '</a>';
+      }
+      var t = escapeHtml(seg.content);
+      // Bold: **text**
+      t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Italic: *text*
+      t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      // Bare URLs
+      t = t.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      return t;
+    }).join('');
+
+    // Lists: * item or - item
+    html = html.replace(/(?:^|<br>)\s*[\*\-]\s+(.+?)(?=<br>|$)/g, '<br>\u2022 $1');
     // Line breaks
     html = html.replace(/\n/g, '<br>');
     return html;
