@@ -595,8 +595,8 @@ Training Rate: ${questionnaire.trainingRate || 'N/A'}
 ${cvText || '(No CV text available)'}
 `;
 
-  // Try models in order of preference (2.5 Flash has free tier quota, 2.0 Flash may not)
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite'];
+  // Try models in order of preference
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
   let lastError: Error | null = null;
 
   for (const modelName of modelsToTry) {
@@ -626,9 +626,9 @@ ${cvText || '(No CV text available)'}
     } catch (err: any) {
       console.error(`[QARP] Gemini ${modelName} error:`, err.message);
       lastError = err;
-      // If rate limited (429), try next model
-      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('quota')) {
-        console.log(`[QARP] Rate limited on ${modelName}, trying next model...`);
+      // If rate limited (429) or model unavailable (404), try next model
+      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('quota') || err.message?.includes('404') || err.message?.includes('NOT_FOUND') || err.message?.includes('no longer available')) {
+        console.log(`[QARP] Model ${modelName} unavailable or rate limited, trying next...`);
         continue;
       }
       // If JSON parse error, retry with same model once
