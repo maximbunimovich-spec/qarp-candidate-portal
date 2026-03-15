@@ -4,7 +4,7 @@ import { QarpLogoFull } from "@/components/QarpLogo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Sparkles, Send, CheckCircle2, Loader2, AlertCircle, FileText, MapPin, Globe, Award, Briefcase, GraduationCap, Wrench, BookOpen, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
 
@@ -36,13 +36,18 @@ interface QARPCVData {
 type PageState = "initial" | "generating" | "preview" | "submitting" | "submitted" | "error";
 
 export default function GeneratedCVPage() {
-  const { candidate } = useAuth();
+  const { candidate, refreshCandidate } = useAuth();
   const [, setLocation] = useLocation();
   const [state, setState] = useState<PageState>("initial");
   const [cvData, setCvData] = useState<QARPCVData | null>(null);
   const [driveLink, setDriveLink] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [editing, setEditing] = useState(false);
+
+  // Refresh candidate data from server on mount to ensure up-to-date state
+  useEffect(() => {
+    refreshCandidate();
+  }, []);
 
   if (!candidate) { setLocation("/"); return null; }
 
