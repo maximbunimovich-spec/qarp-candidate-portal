@@ -2058,15 +2058,19 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
   // Tilda sends: name, email, phone, plus any custom fields
   // Set this URL as webhook in Tilda: Form Settings → Data Receiver → Webhook
   app.post("/api/tilda-lead", async (req: Request, res: Response) => {
+    // Respond immediately to Tilda to prevent timeout — process in background
     res.setHeader("Access-Control-Allow-Origin", "*");
+    res.json({ success: true });
 
     // Tilda sends form data as flat object — field names depend on form config
     // Can be: {Name: "", Email: ""} or {"Input 1": "", ...} or nested {data: [...]}
     let data = req.body || {};
     
     // Log raw payload for debugging
+    const rawBodyStr = JSON.stringify(data).slice(0, 1000);
+    console.log(`[QARP Tilda] Content-Type: ${req.headers['content-type']}`);
     console.log(`[QARP Tilda] Raw payload keys:`, Object.keys(data));
-    console.log(`[QARP Tilda] Raw payload:`, JSON.stringify(data).slice(0, 500));
+    console.log(`[QARP Tilda] Raw payload:`, rawBodyStr);
 
     // Tilda sometimes sends as URL-encoded or as {data: [...]} array
     // Flatten if Tilda sends array format: [{name: "field", value: "val"}, ...]
@@ -2282,8 +2286,7 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
       }
     }
 
-    // Tilda expects 200 OK
-    return res.json({ success: true });
+    // Response already sent at top of handler
   });
 
   // Debug endpoint to see raw Tilda payloads
