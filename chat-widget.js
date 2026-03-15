@@ -274,7 +274,7 @@
       <!-- LEAD GATE -->
       <div class="qc-gate" id="qarp-gate">
         <div class="qc-gate-logo">QARP Assistant</div>
-        <div class="qc-gate-sub">Your GxP compliance advisor. Ask about audits, ICH GCP E6(R3), training, and AI solutions.</div>
+        <div class="qc-gate-sub">Your assistant at The QARP. Ask about audits, training, GCP Auditor School, and AI solutions.</div>
         <input class="qc-gate-input" id="qarp-gate-name" type="text" placeholder="Your name" autocomplete="name">
         <input class="qc-gate-input" id="qarp-gate-email" type="email" placeholder="Work email" autocomplete="email">
         <div class="qc-gate-privacy">
@@ -287,7 +287,7 @@
 
       <!-- CHAT (hidden until lead captured) -->
       <div class="qc-messages" id="qarp-messages" style="display:none">
-        <div class="qc-msg qc-msg-bot" style="white-space:normal"><div class="qc-welcome"><span class="qc-welcome-title">Welcome!</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit">Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?">Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant">AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization">Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support">Consulting</button></div></div>
+        <div class="qc-msg qc-msg-bot" style="white-space:normal"><div class="qc-welcome"><span class="qc-welcome-title">Welcome!</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="Tell me about the GCP Auditor School">Auditor School</button><button class="qc-action" data-msg="I need help with a GxP audit">Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?">Training</button><button class="qc-action" data-msg="Tell me about your AI solutions">AI Solutions</button><button class="qc-action" data-msg="I need GxP consulting support">Consulting</button></div></div>
       </div>
 
       <div class="qc-input-area" id="qarp-input-area" style="display:none">
