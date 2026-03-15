@@ -15,7 +15,6 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Save } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { QuestionnaireData } from "@shared/schema";
-import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 
 const TOTAL_PAGES = 9;
 
@@ -719,7 +718,6 @@ export default function QuestionnairePage() {
       <footer className="border-t border-border/50 px-6 py-4 mt-8">
         <div className="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>QARP-Q-SUR-02-01-01, ver 1.0</span>
-          <PerplexityAttribution />
         </div>
       </footer>
     </div>
