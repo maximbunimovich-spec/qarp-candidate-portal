@@ -1897,6 +1897,179 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
     return res.json({ success: true });
   });
 
+  // === TILDA WEBHOOK — universal endpoint for all Tilda forms ===
+  // Tilda sends: name, email, phone, plus any custom fields
+  // Set this URL as webhook in Tilda: Form Settings → Data Receiver → Webhook
+  app.post("/api/tilda-lead", async (req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    // Tilda sends form data as flat object with field names
+    const data = req.body || {};
+    
+    // Extract common fields (Tilda field names vary)
+    const name = data.Name || data.name || data["Full Name"] || data.fullname || data["First Name"] || "";
+    const email = data.Email || data.email || data.EMAIL || "";
+    const phone = data.Phone || data.phone || data.tel || "";
+    const company = data.Company || data.company || data["Company Name"] || "";
+    const service = data.Service || data.service || data["Interest"] || data.interest || "";
+    const message = data.Message || data.message || data.Comments || data.comments || "";
+    const page = data.formid || data.page || data.Page || data["Form ID"] || data.tranid || "Unknown";
+
+    // Determine source page from Tilda's formid or any page hint
+    let sourcePage = "Tilda Form";
+    const pageStr = String(page).toLowerCase();
+    if (pageStr.includes("enterprise") || pageStr.includes("ai")) sourcePage = "Enterprise AI";
+    else if (pageStr.includes("audit") && pageStr.includes("school")) sourcePage = "Auditor School";
+    else if (pageStr.includes("audit")) sourcePage = "GxP Auditing";
+    else if (pageStr.includes("consult")) sourcePage = "GxP Consulting";
+    else if (pageStr.includes("train")) sourcePage = "GxP Training";
+    else if (pageStr.includes("contact")) sourcePage = "Contact Us";
+
+    // Quick lead score based on available info
+    let leadScore = "🟡 Warm";
+    const allFields = JSON.stringify(data).toLowerCase();
+    if (allFields.includes("demo") || allFields.includes("price") || allFields.includes("quote") || allFields.includes("urgent") || allFields.includes("asap") || company) {
+      leadScore = "🔥 Hot";
+    }
+
+    console.log(`[QARP Tilda] New lead from ${sourcePage}: ${name} <${email}>`);
+
+    // Log to Google Sheets — "Tilda Leads" tab
+    try {
+      const sheets = getSheetsClient();
+      if (sheets) {
+        const TILDA_SHEET = "Tilda Leads";
+        // Ensure sheet exists
+        try {
+          await sheets.spreadsheets.values.get({
+            spreadsheetId: SPREADSHEET_ID,
+            range: `'${TILDA_SHEET}'!A1`,
+          });
+        } catch {
+          try {
+            await sheets.spreadsheets.batchUpdate({
+              spreadsheetId: SPREADSHEET_ID,
+              requestBody: {
+                requests: [{ addSheet: { properties: { title: TILDA_SHEET } } }]
+              }
+            });
+            await sheets.spreadsheets.values.update({
+              spreadsheetId: SPREADSHEET_ID,
+              range: `'${TILDA_SHEET}'!A1:I1`,
+              valueInputOption: "RAW",
+              requestBody: {
+                values: [["Timestamp", "Name", "Email", "Phone", "Company", "Source Page", "Lead Score", "Service/Interest", "Message"]]
+              }
+            });
+            console.log(`[QARP Tilda] Created '${TILDA_SHEET}' sheet`);
+          } catch (createErr: any) {
+            console.error(`[QARP Tilda] Sheet create error:`, createErr.message);
+          }
+        }
+
+        await sheets.spreadsheets.values.append({
+          spreadsheetId: SPREADSHEET_ID,
+          range: `'${TILDA_SHEET}'!A:I`,
+          valueInputOption: "RAW",
+          requestBody: {
+            values: [[
+              new Date().toISOString(),
+              name,
+              email,
+              phone,
+              company,
+              sourcePage,
+              leadScore,
+              service,
+              message
+            ]]
+          }
+        });
+        console.log(`[QARP Tilda] Logged to Sheets: ${email}`);
+      }
+    } catch (sheetErr: any) {
+      console.error(`[QARP Tilda] Sheets error:`, sheetErr.message);
+    }
+
+    // Internal notification email
+    const transporter = getEmailTransporter();
+    if (transporter && email) {
+      const fromUser = process.env.GMAIL_USER || "noreply@theqarp.com";
+      try {
+        await transporter.sendMail({
+          from: `"QARP Website" <${fromUser}>`,
+          to: NOTIFY_EMAILS.join(", "),
+          subject: `[${sourcePage}] New lead: ${name || email}`,
+          html: `
+            <h2>New Lead from ${sourcePage}</h2>
+            <table style="border-collapse:collapse;width:100%;max-width:600px;">
+              ${name ? `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Name</td><td style="padding:8px;border:1px solid #ddd;">${name}</td></tr>` : ''}
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Email</td><td style="padding:8px;border:1px solid #ddd;"><a href="mailto:${email}">${email}</a></td></tr>
+              ${phone ? `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Phone</td><td style="padding:8px;border:1px solid #ddd;">${phone}</td></tr>` : ''}
+              ${company ? `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Company</td><td style="padding:8px;border:1px solid #ddd;">${company}</td></tr>` : ''}
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Source</td><td style="padding:8px;border:1px solid #ddd;">${sourcePage}</td></tr>
+              ${service ? `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Interest</td><td style="padding:8px;border:1px solid #ddd;">${service}</td></tr>` : ''}
+              ${message ? `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Message</td><td style="padding:8px;border:1px solid #ddd;">${message}</td></tr>` : ''}
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Score</td><td style="padding:8px;border:1px solid #ddd;">${leadScore}</td></tr>
+            </table>
+            <p style="margin-top:16px;color:#666;">Source: Tilda form on theqarp.com</p>
+          `
+        });
+      } catch (emailErr: any) {
+        console.error(`[QARP Tilda] Email error:`, emailErr.message);
+      }
+
+      // Welcome email to lead
+      try {
+        await transporter.sendMail({
+          from: `"The QARP" <${fromUser}>`,
+          to: email,
+          subject: "Thank you for your interest — The QARP",
+          html: `
+            <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+              <div style="background: #0B1120; padding: 28px 32px; border-radius: 8px 8px 0 0;">
+                <h1 style="color: #ffffff; font-size: 22px; margin: 0;">The QARP</h1>
+                <p style="color: #00B4D8; font-size: 12px; margin: 6px 0 0;">Quality Assurance Research Professionals</p>
+              </div>
+              <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; background: #ffffff;">
+                <h2 style="font-size: 20px; color: #0B1120; margin-top: 0;">Hi${name ? ' ' + name.split(' ')[0] : ''},</h2>
+                <p>Thank you for reaching out to The QARP. We have received your enquiry and our team will get back to you within 24 hours.</p>
+                <div style="text-align: center; margin: 28px 0;">
+                  <a href="https://calendly.com/maxim-bunimovich-theqarp/30min" style="background: #00B4D8; color: #ffffff; padding: 14px 36px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Book a Free 30-min Call</a>
+                </div>
+                <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                  <p style="font-weight: 600; color: #0B1120; margin-top: 0;">Quick Links</p>
+                  <p style="font-size: 13px; margin: 8px 0;"><a href="https://theqarp.com/auditor_school" style="color: #00B4D8;">GCP Auditor School</a> — Certification programme, 160 CPD points</p>
+                  <p style="font-size: 13px; margin: 8px 0;"><a href="https://theqarpacademy.pro" style="color: #00B4D8;">Training Academy</a> — GCP, GxP, CSV courses from &euro;39/mo</p>
+                  <p style="font-size: 13px; margin: 8px 0;"><a href="https://theqarpacademy.pro/ai" style="color: #00B4D8;">GxP AI Assistant</a> — AI-powered compliance tools</p>
+                  <p style="font-size: 13px; margin: 8px 0;"><a href="https://theqarp.com/enterprise-ai" style="color: #00B4D8;">Enterprise AI</a> — Custom AI trained on your QMS</p>
+                </div>
+                <p style="font-size: 13px; color: #4b5563;"><strong>2,000+ audits</strong> worldwide &bull; <strong>1,400+ trainings</strong> &bull; <strong>100+ experts</strong></p>
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+                <p style="font-size: 13px; color: #4b5563;">Email: <a href="mailto:info@theqarp.com" style="color: #00B4D8;">info@theqarp.com</a> &bull; <a href="https://theqarp.com" style="color: #00B4D8;">theqarp.com</a> &bull; <a href="https://www.linkedin.com/company/theqarp" style="color: #00B4D8;">LinkedIn</a></p>
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0 16px;" />
+                <p style="color: #9ca3af; font-size: 11px; text-align: center;">The QARP &mdash; Global GxP Quality &amp; Compliance<br/><a href="https://theqarpacademy.pro/privacy" style="color:#9ca3af;">Privacy Policy</a></p>
+              </div>
+            </div>
+          `
+        });
+      } catch (welcomeErr: any) {
+        console.error(`[QARP Tilda] Welcome email error:`, welcomeErr.message);
+      }
+    }
+
+    // Tilda expects 200 OK
+    return res.json({ success: true });
+  });
+
+  // Also handle OPTIONS for CORS preflight
+  app.options("/api/tilda-lead", (_req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.sendStatus(204);
+  });
+
   // Admin: export CSV
   app.get("/api/admin/export", (_req: Request, res: Response) => {
     const candidates = storage.getAllCandidates();
