@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import https from "https";
 
 const app = express();
 const httpServer = createServer(app);
@@ -106,6 +107,22 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+
+      // Keep-alive: self-ping every 14 minutes to prevent Render free tier from sleeping
+      // Tilda webhooks have a 5-second timeout; cold starts take 30+ seconds
+      const RENDER_URL = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_EXTERNAL_HOSTNAME;
+      if (RENDER_URL && process.env.NODE_ENV === "production") {
+        const pingUrl = RENDER_URL.startsWith("http") ? RENDER_URL : `https://${RENDER_URL}`;
+        const KEEP_ALIVE_INTERVAL = 14 * 60 * 1000; // 14 minutes
+        setInterval(() => {
+          https.get(`${pingUrl}/api/health`, (res) => {
+            log(`[keep-alive] pinged ${pingUrl}/api/health → ${res.statusCode}`);
+          }).on("error", (err) => {
+            log(`[keep-alive] ping failed: ${err.message}`);
+          });
+        }, KEEP_ALIVE_INTERVAL);
+        log(`[keep-alive] will ping ${pingUrl} every 14 min to prevent sleep`);
+      }
     },
   );
 })();
