@@ -47,6 +47,8 @@ function calculateCompleteness(candidate: Candidate): number {
   return Math.round((filledFields / totalFields) * 100);
 }
 
+export { hashPassword };
+
 export interface IStorage {
   createCandidate(email: string, password: string): Candidate;
   getCandidateByEmail(email: string): Candidate | undefined;
@@ -54,6 +56,7 @@ export interface IStorage {
   updateProfile(id: string, profile: ProfileData): Candidate | undefined;
   uploadCV(id: string, cv: CandidateCV): Candidate | undefined;
   updateQuestionnaire(id: string, data: QuestionnaireData): Candidate | undefined;
+  updatePassword(email: string, newPasswordHash: string): boolean;
   getAllCandidates(): Candidate[];
   getCandidateCV(id: string): CandidateCV | null;
 }
@@ -118,6 +121,16 @@ export class MemStorage implements IStorage {
     }
     c.completenessScore = calculateCompleteness(c);
     return c;
+  }
+
+  updatePassword(email: string, newPasswordHash: string): boolean {
+    for (const c of this.candidates.values()) {
+      if (c.email.toLowerCase() === email.toLowerCase()) {
+        c.passwordHash = newPasswordHash;
+        return true;
+      }
+    }
+    return false;
   }
 
   getAllCandidates(): Candidate[] {
