@@ -607,7 +607,7 @@ ${cvText || '(No CV text available)'}
     msg?.includes('404') || msg?.includes('NOT_FOUND') || msg?.includes('no longer available');
 
   // Try models in order of preference with retry + backoff
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro', 'gemini-flash-latest'];
   let lastError: Error | null = null;
 
   for (const modelName of modelsToTry) {
@@ -1605,7 +1605,7 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
     }));
 
     // Try multiple models with retry for rate limits
-    const chatModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'];
+    const chatModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
     let chatLastError: any = null;
 
     for (const chatModel of chatModels) {
