@@ -1719,10 +1719,10 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
             // Add headers
             await sheets.spreadsheets.values.update({
               spreadsheetId: SPREADSHEET_ID,
-              range: `'${CHATBOT_SHEET}'!A1:F1`,
+              range: `'${CHATBOT_SHEET}'!A1:H1`,
               valueInputOption: "RAW",
               requestBody: {
-                values: [["Timestamp", "Name", "Email", "Session ID", "Messages Count", "Conversation"]]
+                values: [["Timestamp", "Name", "Email", "Session ID", "Messages Count", "Lead Score", "Topics", "Conversation"]]
               }
             });
             console.log(`[QARP Lead] Created '${CHATBOT_SHEET}' sheet with headers`);
@@ -1731,15 +1731,42 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
           }
         }
 
-        // Append conversation row
+        // Append conversation row with lead scoring
         const msgCount = Array.isArray(conversation) ? conversation.length : 0;
         const chatText = Array.isArray(conversation) && conversation.length > 0
           ? conversation.map((msg: {role: string; text: string}) => `[${msg.role}] ${msg.text}`).join('\n')
           : 'No conversation';
+
+        // --- Lead Scoring ---
+        const allText = chatText.toLowerCase();
+        const hotKeywords = ['price', 'pricing', 'cost', 'pay', 'payment', 'invoice', 'subscribe', 'subscription', 'buy', 'purchase', '€', 'euro', 'auditor school', 'enroll', 'enrol', 'sign up', 'register', 'how much', 'discount', 'demo', 'proposal', 'quote', 'offer', 'calendly', 'book a call', 'schedule', 'start date', 'when does it start', 'next cohort'];
+        const warmKeywords = ['audit', 'auditor', 'training', 'course', 'gcp', 'certification', 'career', 'experience', 'monitor', 'cra', 'clinical', 'quality', 'compliance', 'ai assistant', 'enterprise', 'gxp', 'sop', 'capa', 'csv', 'consulting', 'inspection'];
         
+        const hotHits = hotKeywords.filter(k => allText.includes(k));
+        const warmHits = warmKeywords.filter(k => allText.includes(k));
+        
+        let leadScore = 'Cold';
+        if (hotHits.length >= 1) {
+          leadScore = '🔥 Hot';
+        } else if (warmHits.length >= 2) {
+          leadScore = '🟡 Warm';
+        } else if (warmHits.length >= 1 || msgCount >= 3) {
+          leadScore = '🟡 Warm';
+        }
+
+        // Detected topics
+        const topics: string[] = [];
+        if (allText.includes('auditor school') || allText.includes('become an auditor') || allText.includes('certification')) topics.push('Auditor School');
+        if (allText.includes('audit') && !allText.includes('auditor school')) topics.push('Audit Services');
+        if (allText.includes('training') || allText.includes('course')) topics.push('Training');
+        if (allText.includes('ai') || allText.includes('enterprise')) topics.push('AI/Enterprise');
+        if (allText.includes('consulting') || allText.includes('inspection')) topics.push('Consulting');
+        if (allText.includes('gcp') || allText.includes('r3') || allText.includes('e6')) topics.push('GCP/R3');
+        if (topics.length === 0) topics.push('General');
+
         await sheets.spreadsheets.values.append({
           spreadsheetId: SPREADSHEET_ID,
-          range: `'${CHATBOT_SHEET}'!A:F`,
+          range: `'${CHATBOT_SHEET}'!A:H`,
           valueInputOption: "RAW",
           requestBody: {
             values: [[
@@ -1748,6 +1775,8 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
               email,
               leadSessionId || "N/A",
               msgCount.toString(),
+              leadScore,
+              topics.join(', '),
               chatText
             ]]
           }
@@ -1758,12 +1787,14 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
       console.error(`[QARP Lead] Google Sheets error:`, sheetErr.message);
     }
 
-    // Send email to bd@theqarp.com with conversation
     const transporter = getEmailTransporter();
     if (transporter) {
+      const fromUser = process.env.GMAIL_USER || "noreply@theqarp.com";
+
+      // 1) Internal notification to BD team
       try {
         await transporter.sendMail({
-          from: `"QARP AI Chatbot" <${process.env.GMAIL_USER || "noreply@theqarp.com"}>`,
+          from: `"QARP AI Chatbot" <${fromUser}>`,
           to: "bd@theqarp.com",
           cc: ["maxim.bunimovich@theqarp.com", "valeria.sokolova@theqarp.com"],
           subject: `New Chatbot Lead: ${name} (${email})`,
@@ -1780,9 +1811,86 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
             <p style="margin-top:20px;color:#666;">This lead was captured by the QARP AI Chatbot on theqarp.com. Follow up promptly!</p>
           `
         });
-        console.log(`[QARP Lead] Email sent to bd@theqarp.com for ${email}`);
+        console.log(`[QARP Lead] Internal notification sent for ${email}`);
       } catch (emailErr: any) {
-        console.error(`[QARP Lead] Email error:`, emailErr.message);
+        console.error(`[QARP Lead] Internal email error:`, emailErr.message);
+      }
+
+      // 2) Welcome email to the LEAD with links and next steps
+      try {
+        await transporter.sendMail({
+          from: `"The QARP" <${fromUser}>`,
+          to: email,
+          subject: "Thank you for contacting The QARP",
+          html: `
+            <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+              <!-- Header -->
+              <div style="background: #0B1120; padding: 28px 32px; border-radius: 8px 8px 0 0;">
+                <h1 style="color: #ffffff; font-size: 22px; margin: 0; letter-spacing: 0.5px;">The QARP</h1>
+                <p style="color: #00B4D8; font-size: 12px; margin: 6px 0 0; letter-spacing: 0.3px;">Quality Assurance Research Professionals</p>
+              </div>
+
+              <div style="padding: 32px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; background: #ffffff;">
+                <h2 style="font-size: 20px; color: #0B1120; margin-top: 0;">Hi ${name.split(' ')[0]},</h2>
+                <p>Thank you for reaching out to The QARP. We are a global network of GxP auditors, QA consultants, and trainers helping life sciences organisations build inspection-ready quality systems.</p>
+                <p>Our team will follow up with you shortly. In the meantime, here are some resources that may interest you:</p>
+
+                <!-- CTA: Book a Call -->
+                <div style="text-align: center; margin: 28px 0;">
+                  <a href="https://calendly.com/maxim-bunimovich-theqarp/30min" style="background: #00B4D8; color: #ffffff; padding: 14px 36px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 15px;">Book a Free 30-min Consultation</a>
+                </div>
+
+                <!-- Services -->
+                <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                  <p style="font-weight: 600; color: #0B1120; margin-top: 0; font-size: 15px;">Explore Our Services</p>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5;">
+                        <a href="https://theqarp.com/auditor_school" style="color: #0B1120; text-decoration: none; font-weight: 600;">GCP Auditor School</a><br/>
+                        <span style="font-size: 12px; color: #4b5563;">Certification programme with live sessions, 160 CPD points, and exam. From &euro;200/month or &euro;2,000 one-time.</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5;">
+                        <a href="https://theqarpacademy.pro" style="color: #0B1120; text-decoration: none; font-weight: 600;">Training Academy</a><br/>
+                        <span style="font-size: 12px; color: #4b5563;">ICH GCP E6(R3) courses, GxP compliance modules, CSV &amp; Data Integrity. Starting at &euro;39/month.</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5;">
+                        <a href="https://theqarpacademy.pro/ai" style="color: #0B1120; text-decoration: none; font-weight: 600;">GxP AI Assistant</a><br/>
+                        <span style="font-size: 12px; color: #4b5563;">AI-powered compliance tools: CAPA drafting, audit checklists, SOP Q&amp;A. 40+ regulatory docs in the knowledge base.</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px 0;">
+                        <a href="https://theqarp.com/enterprise-ai" style="color: #0B1120; text-decoration: none; font-weight: 600;">Enterprise AI</a><br/>
+                        <span style="font-size: 12px; color: #4b5563;">Custom AI trained on your SOPs and QMS. Data isolation, GAMP 5 compliant, team dashboards.</span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+
+                <!-- Social proof -->
+                <p style="font-size: 13px; color: #4b5563; margin-top: 20px;"><strong>2,000+ audits</strong> completed worldwide &bull; <strong>1,400+ trainings</strong> delivered &bull; <strong>100+ experts</strong> in our global network</p>
+
+                <!-- Contact -->
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
+                <p style="font-size: 13px; color: #4b5563; margin-bottom: 4px;">Questions? Contact us directly:</p>
+                <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">Email: <a href="mailto:info@theqarp.com" style="color: #00B4D8;">info@theqarp.com</a></p>
+                <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">Phone: <a href="tel:+34625263964" style="color: #00B4D8;">+34 625 263 964</a></p>
+                <p style="font-size: 13px; color: #4b5563; margin: 4px 0;">Website: <a href="https://theqarp.com" style="color: #00B4D8;">theqarp.com</a> &bull; <a href="https://www.linkedin.com/company/theqarp" style="color: #00B4D8;">LinkedIn</a></p>
+
+                <!-- Footer -->
+                <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0 16px;" />
+                <p style="color: #9ca3af; font-size: 11px; margin-bottom: 0; text-align: center;">The QARP &mdash; Quality Assurance Research Professionals<br/>Global GxP Quality &amp; Compliance: Training &bull; Audits &bull; Expert Network &bull; Technology<br/><br/>You received this email because you contacted The QARP via our website chatbot. <a href="https://theqarpacademy.pro/privacy" style="color:#9ca3af;">Privacy Policy</a></p>
+              </div>
+            </div>
+          `
+        });
+        console.log(`[QARP Lead] Welcome email sent to ${email}`);
+      } catch (welcomeErr: any) {
+        console.error(`[QARP Lead] Welcome email error:`, welcomeErr.message);
       }
     }
 
