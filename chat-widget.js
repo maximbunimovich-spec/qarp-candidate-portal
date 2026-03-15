@@ -136,8 +136,17 @@
     /* ---------- MOBILE ---------- */
     '@media(max-width:480px){',
     '  #qarp-chat-popup { bottom:0; right:0; left:0; top:0; width:100vw; height:100vh; max-height:100vh; max-width:100vw; border-radius:0; position:fixed; }',
+    '  #qarp-chat-popup .qc-messages { padding:12px; }',
+    '  #qarp-chat-popup .qc-input-area { padding:10px 12px 16px; padding-bottom:max(16px,env(safe-area-inset-bottom)); }',
+    '  #qarp-chat-popup .qc-textarea { font-size:16px; min-height:46px; }',
+    '  #qarp-chat-popup .qc-action { padding:9px 14px; font-size:14px; }',
+    '  #qarp-chat-popup .qc-msg { font-size:15px; padding:12px 16px; max-width:92%; }',
     '  #qarp-chat-bubble { bottom:16px; right:16px; width:56px; height:56px; }',
     '  #qarp-chat-bubble.qopen { display:none; }',
+    '}',
+    '@media(max-width:480px) and (max-height:700px){',
+    '  #qarp-chat-popup .qc-header { padding:12px 16px; }',
+    '  #qarp-chat-popup .qc-header-icon { width:36px; height:36px; border-radius:10px; }',
     '}'
   ].join('\n');
   document.head.appendChild(style);
