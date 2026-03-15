@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { Shield, ClipboardList, Upload, FileText, GraduationCap, Bot, Sparkles, ExternalLink, Lock, Mail, Eye, EyeOff } from "lucide-react";
-import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 
 const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
 
@@ -377,7 +376,6 @@ export default function LandingPage() {
       <footer className="border-t border-border/50 px-6 py-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} The QARP — Quality Assurance Research Professionals</span>
-          <PerplexityAttribution />
         </div>
       </footer>
     </div>
