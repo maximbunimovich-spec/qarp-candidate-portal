@@ -595,69 +595,101 @@ Training Rate: ${questionnaire.trainingRate || 'N/A'}
 ${cvText || '(No CV text available)'}
 `;
 
-  // Try models in order of preference
-  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-pro'];
+  // Helper: sleep for ms
+  const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
+  // Helper: check if error is rate-limit or model unavailable
+  const isRetryable = (msg: string) =>
+    msg?.includes('429') || msg?.includes('RESOURCE_EXHAUSTED') || msg?.includes('quota') ||
+    msg?.includes('503') || msg?.includes('UNAVAILABLE') || msg?.includes('overloaded') ||
+    msg?.includes('500') || msg?.includes('INTERNAL');
+  const isModelGone = (msg: string) =>
+    msg?.includes('404') || msg?.includes('NOT_FOUND') || msg?.includes('no longer available');
+
+  // Try models in order of preference with retry + backoff
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.5-pro'];
   let lastError: Error | null = null;
 
   for (const modelName of modelsToTry) {
-    try {
-      console.log(`[QARP] Trying model ${modelName} for ${candidate.email}...`);
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\n' + userMessage }] }],
-        config: {
-          temperature: 0.3,
-          maxOutputTokens: 8000,
-        },
-      });
-
-      const text = response.text || '';
-      // Extract JSON from response (may be wrapped in ```json ... ```)
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('AI did not return valid JSON');
-
-      let jsonStr = jsonMatch[0];
-      // Repair common JSON issues from LLMs
-      jsonStr = repairJSON(jsonStr);
-
-      const cvData = JSON.parse(jsonStr);
-      console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName}`);
-      return cvData;
-    } catch (err: any) {
-      console.error(`[QARP] Gemini ${modelName} error:`, err.message);
-      lastError = err;
-      // If rate limited (429) or model unavailable (404), try next model
-      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('quota') || err.message?.includes('404') || err.message?.includes('NOT_FOUND') || err.message?.includes('no longer available')) {
-        console.log(`[QARP] Model ${modelName} unavailable or rate limited, trying next...`);
-        continue;
-      }
-      // If JSON parse error, retry with same model once
-      if (err.message?.includes('JSON') || err.message?.includes('position') || err.message?.includes('Unexpected')) {
-        console.log(`[QARP] JSON parse error on ${modelName}, retrying...`);
-        try {
-          const retryResponse = await ai.models.generateContent({
-            model: modelName,
-            contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\nIMPORTANT: Return ONLY a single valid JSON object. No trailing commas. No comments. Ensure all strings are properly escaped.\n\n' + userMessage }] }],
-            config: { temperature: 0.1, maxOutputTokens: 8000 },
-          });
-          const retryText = retryResponse.text || '';
-          const retryMatch = retryText.match(/\{[\s\S]*\}/);
-          if (retryMatch) {
-            const cvData = JSON.parse(repairJSON(retryMatch[0]));
-            console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName} (retry)`);
-            return cvData;
-          }
-        } catch (retryErr: any) {
-          console.error(`[QARP] Retry also failed:`, retryErr.message);
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        if (attempt > 0) {
+          const backoff = Math.min(2000 * Math.pow(2, attempt - 1), 15000);
+          console.log(`[QARP] Retry ${attempt}/${maxRetries} for ${modelName} after ${backoff}ms backoff...`);
+          await sleep(backoff);
         }
-        continue;
+        console.log(`[QARP] Trying model ${modelName} for ${candidate.email} (attempt ${attempt + 1})...`);
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\n' + userMessage }] }],
+          config: {
+            temperature: 0.3,
+            maxOutputTokens: 8000,
+          },
+        });
+
+        const text = response.text || '';
+        // Extract JSON from response (may be wrapped in ```json ... ```)
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error('AI did not return valid JSON');
+
+        let jsonStr = jsonMatch[0];
+        // Repair common JSON issues from LLMs
+        jsonStr = repairJSON(jsonStr);
+
+        const cvData = JSON.parse(jsonStr);
+        console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName}`);
+        return cvData;
+      } catch (err: any) {
+        console.error(`[QARP] Gemini ${modelName} error (attempt ${attempt + 1}):`, err.message);
+        lastError = err;
+
+        // Model no longer available — skip to next model immediately
+        if (isModelGone(err.message)) {
+          console.log(`[QARP] Model ${modelName} no longer available, skipping...`);
+          break;
+        }
+
+        // Rate limited — retry with backoff if attempts remain, else try next model
+        if (isRetryable(err.message)) {
+          if (attempt < maxRetries - 1) {
+            console.log(`[QARP] Model ${modelName} rate limited, will retry...`);
+            continue;
+          }
+          console.log(`[QARP] Model ${modelName} exhausted after ${maxRetries} retries, trying next model...`);
+          break;
+        }
+
+        // JSON parse error — retry with stricter prompt once
+        if (err.message?.includes('JSON') || err.message?.includes('position') || err.message?.includes('Unexpected')) {
+          console.log(`[QARP] JSON parse error on ${modelName}, retrying with stricter prompt...`);
+          try {
+            const retryResponse = await ai.models.generateContent({
+              model: modelName,
+              contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\nIMPORTANT: Return ONLY a single valid JSON object. No trailing commas. No comments. Ensure all strings are properly escaped.\n\n' + userMessage }] }],
+              config: { temperature: 0.1, maxOutputTokens: 8000 },
+            });
+            const retryText = retryResponse.text || '';
+            const retryMatch = retryText.match(/\{[\s\S]*\}/);
+            if (retryMatch) {
+              const cvData = JSON.parse(repairJSON(retryMatch[0]));
+              console.log(`[QARP] AI generated QARP CV for ${candidate.email} using ${modelName} (retry)`);
+              return cvData;
+            }
+          } catch (retryErr: any) {
+            console.error(`[QARP] Retry also failed:`, retryErr.message);
+          }
+          break; // Move to next model
+        }
+
+        // For other errors, throw immediately
+        throw new Error('Failed to generate CV: ' + err.message);
       }
-      // For other errors, throw immediately
-      throw new Error('Failed to generate CV: ' + err.message);
     }
   }
 
-  throw new Error('Failed to generate CV: All AI models exhausted. ' + (lastError?.message || 'Please try again later or enable billing on the Google Cloud project.'));
+  throw new Error('Failed to generate CV: AI service temporarily unavailable. Please try again in a few minutes. ' + (lastError?.message || ''));
 }
 
 // Store generated CVs in memory (keyed by candidate ID)
@@ -1572,48 +1604,47 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
       parts: [{ text: msg.content }]
     }));
 
-    try {
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        config: {
-          systemInstruction: QARP_SYSTEM_PROMPT,
-          temperature: 0.75,
-          maxOutputTokens: 2048,
-        },
-        contents: geminiContents,
-      });
+    // Try multiple models with retry for rate limits
+    const chatModels = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash-lite'];
+    let chatLastError: any = null;
 
-      const reply = response?.text || "I'm sorry, I couldn't generate a response. Please try again or contact us at info@theqarp.com.";
+    for (const chatModel of chatModels) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
+          console.log(`[QARP Chatbot] Trying ${chatModel} (attempt ${attempt + 1})...`);
+          const response = await ai.models.generateContent({
+            model: chatModel,
+            config: {
+              systemInstruction: QARP_SYSTEM_PROMPT,
+              temperature: 0.75,
+              maxOutputTokens: 2048,
+            },
+            contents: geminiContents,
+          });
 
-      // Add assistant response to history
-      history.push({ role: "assistant", content: reply });
-
-      return res.json({ reply, sessionId: sid });
-    } catch (err: any) {
-      console.error("[QARP Chatbot] Gemini error:", err.message);
-
-      // Fallback to lighter model
-      try {
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash-lite",
-          config: {
-            systemInstruction: QARP_SYSTEM_PROMPT,
-            temperature: 0.75,
-            maxOutputTokens: 2048,
-          },
-          contents: geminiContents,
-        });
-
-        const reply = response?.text || "I'm sorry, I couldn't generate a response. Please try again or contact us at info@theqarp.com.";
-        history.push({ role: "assistant", content: reply });
-        return res.json({ reply, sessionId: sid });
-      } catch (err2: any) {
-        console.error("[QARP Chatbot] Fallback model error:", err2.message);
-        return res.status(500).json({
-          error: "I'm temporarily unavailable. Please contact us directly at info@theqarp.com or call +34 625 263 964."
-        });
+          const reply = response?.text || "I'm sorry, I couldn't generate a response. Please try again or contact us at info@theqarp.com.";
+          history.push({ role: "assistant", content: reply });
+          return res.json({ reply, sessionId: sid });
+        } catch (err: any) {
+          console.error(`[QARP Chatbot] ${chatModel} error (attempt ${attempt + 1}):`, err.message);
+          chatLastError = err;
+          // Rate limited or server error — retry or try next model
+          if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED') || err.message?.includes('503') || err.message?.includes('500') || err.message?.includes('quota')) {
+            if (attempt === 0) continue; // retry once
+            break; // move to next model
+          }
+          // Model gone — skip immediately
+          if (err.message?.includes('404') || err.message?.includes('NOT_FOUND') || err.message?.includes('no longer available')) break;
+          break; // other errors — try next model
+        }
       }
     }
+
+    console.error("[QARP Chatbot] All models failed:", chatLastError?.message);
+    return res.status(500).json({
+      error: "I'm temporarily unavailable. Please try again in a minute or contact us directly at info@theqarp.com."
+    });
   });
 
   // ===== Lead Capture Endpoint =====
