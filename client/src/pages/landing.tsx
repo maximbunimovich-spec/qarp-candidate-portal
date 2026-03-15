@@ -8,6 +8,8 @@ import { useAuth } from "@/lib/auth";
 import { Shield, ClipboardList, Upload, FileText, GraduationCap, Bot, Sparkles, ExternalLink, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { PerplexityAttribution } from "@/components/PerplexityAttribution";
 
+const API_BASE = "__PORT_5000__".startsWith("__") ? "" : "__PORT_5000__";
+
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,8 +17,36 @@ export default function LandingPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<"login" | "register">("register");
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const { login, register } = useAuth();
   const [, setLocation] = useLocation();
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!resetEmail || !resetEmail.includes("@")) {
+      setError("Please enter a valid email address");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/candidates/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Request failed");
+      setResetSent(true);
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,81 +134,154 @@ export default function LandingPage() {
           <Card className="bg-card border-card-border">
             <CardHeader className="pb-4">
               <CardTitle className="font-display text-xl">
-                {mode === "register" ? "Create Account" : "Welcome Back"}
+                {resetMode ? "Reset Password" : mode === "register" ? "Create Account" : "Welcome Back"}
               </CardTitle>
               <CardDescription>
-                {mode === "register"
+                {resetMode
+                  ? "Enter your email and we'll send you a temporary password."
+                  : mode === "register"
                   ? "Register with your email and a password to start your application."
                   : "Sign in with your email and password to continue your application."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-background border-border pl-10"
-                    data-testid="input-email"
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder={mode === "register" ? "Create a password (min. 6 chars)" : "Enter your password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background border-border pl-10 pr-10"
-                    data-testid="input-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
+              {resetMode ? (
+                resetSent ? (
+                  <div className="space-y-4 text-center py-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                      <Mail className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-foreground font-medium">Check your email</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        If an account exists for <span className="font-medium text-foreground">{resetEmail}</span>, we've sent a temporary password.
+                      </p>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      className="w-full"
+                      onClick={() => { setResetMode(false); setResetSent(false); setResetEmail(""); setMode("login"); setError(""); }}
+                      data-testid="button-back-to-login"
+                    >
+                      Back to Sign In
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        type="email"
+                        placeholder="your.email@example.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        className="bg-background border-border pl-10"
+                        data-testid="input-reset-email"
+                      />
+                    </div>
+                    {error && (
+                      <p className="text-sm text-destructive" data-testid="text-error">{error}</p>
+                    )}
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={resetLoading}
+                      data-testid="button-reset-submit"
+                    >
+                      {resetLoading ? "Sending..." : "Send Temporary Password"}
+                    </Button>
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => { setResetMode(false); setError(""); }}
+                        className="text-sm text-primary hover:underline"
+                        data-testid="button-cancel-reset"
+                      >
+                        Back to Sign In
+                      </button>
+                    </div>
+                  </form>
+                )
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-background border-border pl-10"
+                      data-testid="input-email"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder={mode === "register" ? "Create a password (min. 6 chars)" : "Enter your password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="bg-background border-border pl-10 pr-10"
+                      data-testid="input-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {mode === "login" && (
+                    <div className="text-right">
+                      <button
+                        type="button"
+                        onClick={() => { setResetMode(true); setResetEmail(email); setError(""); }}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        data-testid="button-forgot-password"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  )}
+                  {error && (
+                    <p className="text-sm text-destructive" data-testid="text-error">{error}</p>
+                  )}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={loading}
+                    data-testid="button-submit"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-                {error && (
-                  <p className="text-sm text-destructive" data-testid="text-error">{error}</p>
-                )}
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading}
-                  data-testid="button-submit"
-                >
-                  {loading ? "Please wait..." : mode === "register" ? "Create Account" : "Sign In"}
-                </Button>
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => { setMode(mode === "register" ? "login" : "register"); setError(""); }}
-                    className="text-sm text-primary hover:underline"
-                    data-testid="button-toggle-mode"
-                  >
-                    {mode === "register"
-                      ? "Already have an account? Sign in"
-                      : "Don't have an account? Register"}
-                  </button>
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  By continuing, you agree to The QARP{" "}
-                  <a
-                    href="https://theqarp.com/privacy_policy"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Privacy Policy
-                  </a>
-                </p>
-              </form>
+                    {loading ? "Please wait..." : mode === "register" ? "Create Account" : "Sign In"}
+                  </Button>
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => { setMode(mode === "register" ? "login" : "register"); setError(""); }}
+                      className="text-sm text-primary hover:underline"
+                      data-testid="button-toggle-mode"
+                    >
+                      {mode === "register"
+                        ? "Already have an account? Sign in"
+                        : "Don't have an account? Register"}
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">
+                    By continuing, you agree to The QARP{" "}
+                    <a
+                      href="https://theqarp.com/privacy_policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Privacy Policy
+                    </a>
+                  </p>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>
