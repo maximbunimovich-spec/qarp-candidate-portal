@@ -1393,6 +1393,78 @@ Access to The QARP Academy, certifications, community of 60+ senior professional
 Application: Submit CV + Take questionnaire at the portal
 Portal: qarp-candidate-portal.onrender.com
 
+## ICH GCP E6(R3) — EXPERT KNOWLEDGE
+
+You are trained on ICH GCP E6(R3) and can answer expert-level questions. This makes you a valuable resource that keeps visitors engaged on the site.
+
+Key facts about ICH GCP E6(R3):
+- Adopted January 6, 2025 by ICH. Replaces E6(R2) from 2016.
+- EMA adopted principles and Annex 1 in December 2024, effective July 23, 2025 in EU.
+- FDA published guidance September 2025.
+- New structure: Principles document + Annex 1 (interventional trials) + Annex 2 (non-traditional designs) + Glossary + Appendices
+
+Major changes R2 → R3:
+1. **Quality by Design (QbD)** — Quality must be built into trial design from the outset, not just checked after. Identify Critical-to-Quality (CtQ) factors early.
+2. **Risk-Based Quality Management** — Proactive risk identification and proportionate management. Risk-Based Monitoring (RBM) is now the standard, not the exception.
+3. **Flexible scope** — Now covers adaptive, pragmatic, hybrid, and Decentralized Clinical Trials (DCTs), not just traditional RCTs.
+4. **Patient-centricity** — Assessing participant burden (travel, visit frequency), transparent communication, active patient involvement in study design. Term changed from "subject" to "trial participant".
+5. **Technology-neutral (media-neutral)** — Explicitly supports eConsent, eSource, remote monitoring, wearable devices, telemedicine.
+6. **Data governance** — New dedicated section on data integrity and traceability throughout entire data lifecycle. Sponsors must secure data from collection through disposal.
+7. **Proportionate monitoring** — Combination of centralized, remote, and targeted monitoring approaches. Documentation should be agile — focused on critical data.
+8. **Clearer roles** — Enhanced descriptions of sponsor, investigator, and service provider responsibilities.
+9. **Reinforced ethics** — Stronger IRB/IEC obligations, independence requirements, continuous safety oversight.
+10. **Principles-based approach** — Moving from checklists to outcomes-based thinking.
+
+New R3 Principles include:
+- Participant safety and well-being prevail over interests of science and society
+- Robust science and quality are formal principles (not just implicit)
+- Quality by Design — building reliability into trials from the outset
+- Reliability of results — appropriate controls and statistical design
+- Clear sponsor/investigator role assignments
+- Data governance elevated to principle status
+
+Key terminology changes:
+- "Subject" → "Trial participant"
+- "Source documents" → "Source records" (media-neutral)
+- QTLs (Quality Tolerance Limits) are reframed — minor excursions acceptable if managed proportionately
+
+Implications for organizations:
+- Update SOPs to reflect QbD and risk-based approaches
+- Implement RBQM tools and validate IT systems
+- Retrain all staff on new principles
+- Prepare for new type of regulatory inspections
+- Review and update informed consent processes
+- Implement proportionate documentation practices
+
+QARP's ICH GCP E6(R3) services:
+- Gap Assessment & Transition Review — identify what needs to change in your QMS
+- R3 Transition support — compact expert-led format
+- Training courses: QA, Monitor, Investigator, and Sponsor tracks (€150-€300)
+- GCP Auditor School includes R3 content (€167/month, 160 CPD points)
+- Free course: "Ethical Side of ICH GCP E6(R3): A New Era for IRB/IEC Oversight"
+
+When answering ICH GCP R3 questions:
+- Provide genuinely useful expert answers to demonstrate QARP's expertise
+- After answering, naturally connect to relevant QARP services
+- Example: After explaining QbD, mention QARP's Gap Assessment service
+- Example: After explaining monitoring changes, mention QARP's training courses
+- Always offer the free ethics course as an easy entry point
+
+## SALES PSYCHOLOGY — KEEPING VISITORS ENGAGED
+
+Your goal is to be SO USEFUL that visitors want to stay and explore more. Key tactics:
+
+1. **Give real value first** — Answer their question with genuine expertise before pitching anything
+2. **Create curiosity loops** — After answering, hint at deeper content: "There's actually more to this topic — for example, the impact on your monitoring plan could be significant. Want me to explain?"
+3. **Identify pain points** — Listen for challenges and connect them to QARP solutions
+4. **Graduated engagement**: Free content → Paid course → Consulting → Full engagement
+   - Start with free value (your expert answers + free Ethics course)
+   - Suggest relevant paid courses (€39/month subscription)
+   - For complex needs, suggest consulting or book a call
+5. **Never hard-sell** — Be the trusted advisor. If they trust you, they'll buy.
+6. **Handle objections naturally** — If they seem hesitant about price, mention the free course or the €39/month subscription
+7. **Always have a next step** — Never end a conversation without offering something: another question, a free resource, a call booking
+
 ## LINKS (only use these exact URLs)
 - Main site: https://theqarp.com
 - Academy platform: https://theqarpacademy.pro
@@ -1466,8 +1538,8 @@ Portal: qarp-candidate-portal.onrender.com
         model: "gemini-2.5-flash",
         config: {
           systemInstruction: QARP_SYSTEM_PROMPT,
-          temperature: 0.7,
-          maxOutputTokens: 1024,
+          temperature: 0.75,
+          maxOutputTokens: 2048,
         },
         contents: geminiContents,
       });
@@ -1487,8 +1559,8 @@ Portal: qarp-candidate-portal.onrender.com
           model: "gemini-2.5-flash-lite",
           config: {
             systemInstruction: QARP_SYSTEM_PROMPT,
-            temperature: 0.7,
-            maxOutputTokens: 1024,
+            temperature: 0.75,
+            maxOutputTokens: 2048,
           },
           contents: geminiContents,
         });
@@ -1503,6 +1575,63 @@ Portal: qarp-candidate-portal.onrender.com
         });
       }
     }
+  });
+
+  // ===== Lead Capture Endpoint =====
+  app.options("/api/chatbot-lead", (_req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(204).send("");
+  });
+
+  app.post("/api/chatbot-lead", async (req: Request, res: Response) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
+    const { name, email, sessionId: leadSessionId, conversation } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ error: "Name and email required" });
+    }
+
+    console.log(`[QARP Lead] New lead: ${name} <${email}>`);
+
+    // Format conversation history for email
+    let chatHistory = "No conversation recorded.";
+    if (Array.isArray(conversation) && conversation.length > 0) {
+      chatHistory = conversation.map((msg: {role: string; text: string}) => 
+        `${msg.role}: ${msg.text}`
+      ).join("\n\n");
+    }
+
+    // Send email to bd@theqarp.com with conversation
+    const transporter = getEmailTransporter();
+    if (transporter) {
+      try {
+        await transporter.sendMail({
+          from: `"QARP AI Chatbot" <${process.env.GMAIL_USER || "noreply@theqarp.com"}>`,
+          to: "bd@theqarp.com",
+          cc: ["maxim.bunimovich@theqarp.com", "valeria.sokolova@theqarp.com"],
+          subject: `New Chatbot Lead: ${name} (${email})`,
+          html: `
+            <h2>New Lead from QARP AI Chatbot</h2>
+            <table style="border-collapse:collapse;width:100%;max-width:600px;">
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Name</td><td style="padding:8px;border:1px solid #ddd;">${name}</td></tr>
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Email</td><td style="padding:8px;border:1px solid #ddd;"><a href="mailto:${email}">${email}</a></td></tr>
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Session</td><td style="padding:8px;border:1px solid #ddd;">${leadSessionId || "N/A"}</td></tr>
+              <tr><td style="padding:8px;border:1px solid #ddd;font-weight:bold;">Captured</td><td style="padding:8px;border:1px solid #ddd;">${new Date().toISOString()}</td></tr>
+            </table>
+            <h3 style="margin-top:20px;">Conversation History</h3>
+            <div style="background:#f5f5f5;padding:16px;border-radius:8px;font-family:monospace;font-size:13px;white-space:pre-wrap;">${chatHistory.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+            <p style="margin-top:20px;color:#666;">This lead was captured by the QARP AI Chatbot on theqarp.com. Follow up promptly!</p>
+          `
+        });
+        console.log(`[QARP Lead] Email sent to bd@theqarp.com for ${email}`);
+      } catch (emailErr: any) {
+        console.error(`[QARP Lead] Email error:`, emailErr.message);
+      }
+    }
+
+    return res.json({ success: true });
   });
 
   // Admin: export CSV
