@@ -539,14 +539,52 @@ IMPORTANT RULES:
 function repairJSON(str: string): string {
   // Remove BOM and zero-width characters
   str = str.replace(/^\uFEFF/, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
-  // Remove trailing commas before } or ]
-  str = str.replace(/,\s*([}\]])/g, '$1');
-  // Fix unescaped newlines inside string values
-  str = str.replace(/(["'])([^"']*?)\n([^"']*?)\1/g, (match, q, before, after) => {
-    return q + before + '\\n' + after + q;
-  });
   // Remove control characters that break JSON (except \n \r \t)
   str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+  // Remove trailing commas before } or ]
+  str = str.replace(/,\s*([}\]])/g, '$1');
+  
+  // Replace single-quoted keys/values with double quotes
+  // Step 1: Replace single-quoted property names: {'key' → {"key"
+  str = str.replace(/([{,]\s*)'([^']+?)'(\s*:)/g, '$1"$2"$3');
+  // Step 2: Replace single-quoted string values: : 'value' → : "value"
+  str = str.replace(/(:\s*)'((?:[^'\\]|\\.)*)'/g, (_, prefix, val) => {
+    // Escape any double quotes inside the value
+    const escaped = val.replace(/"/g, '\\"');
+    return prefix + '"' + escaped + '"';
+  });
+  
+  // Fix unescaped newlines/tabs inside double-quoted strings
+  // Walk through the string character by character to handle multi-line values
+  let result = '';
+  let inString = false;
+  let i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if (ch === '"' && (i === 0 || str[i-1] !== '\\')) {
+      inString = !inString;
+      result += ch;
+    } else if (inString && ch === '\n') {
+      result += '\\n';
+    } else if (inString && ch === '\r') {
+      result += '\\r';
+    } else if (inString && ch === '\t') {
+      result += '\\t';
+    } else {
+      result += ch;
+    }
+    i++;
+  }
+  str = result;
+  
+  // Remove JS-style comments (// and /* */)
+  // Only outside strings — already handled above, so strip carefully
+  str = str.replace(/\/\/[^\n]*/g, '');
+  str = str.replace(/\/\*[\s\S]*?\*\//g, '');
+  
+  // Remove trailing commas again (in case comments left some)
+  str = str.replace(/,\s*([}\]])/g, '$1');
+  
   return str;
 }
 
@@ -626,6 +664,7 @@ ${cvText || '(No CV text available)'}
           config: {
             temperature: 0.3,
             maxOutputTokens: 8000,
+            responseMimeType: 'application/json',
           },
         });
 
@@ -667,8 +706,8 @@ ${cvText || '(No CV text available)'}
           try {
             const retryResponse = await ai.models.generateContent({
               model: modelName,
-              contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\nIMPORTANT: Return ONLY a single valid JSON object. No trailing commas. No comments. Ensure all strings are properly escaped.\n\n' + userMessage }] }],
-              config: { temperature: 0.1, maxOutputTokens: 8000 },
+              contents: [{ role: 'user', parts: [{ text: QARP_CV_PROMPT + '\n\nIMPORTANT: Return ONLY a single valid JSON object. No trailing commas. No comments. Ensure all strings use double quotes. Ensure all strings are properly escaped.\n\n' + userMessage }] }],
+              config: { temperature: 0.1, maxOutputTokens: 8000, responseMimeType: 'application/json' },
             });
             const retryText = retryResponse.text || '';
             const retryMatch = retryText.match(/\{[\s\S]*\}/);
