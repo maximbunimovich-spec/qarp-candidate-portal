@@ -85,8 +85,8 @@
 
     /* === LEAD GATE (before chat) === */
     .qc-gate {
-      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:28px 24px; text-align:center; background:${BRAND.gray50};
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+      padding:40px 24px 24px; text-align:center; background:${BRAND.gray50};
     }
     .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:20px; font-weight:700; color:${BRAND.navy}; margin-bottom:4px; }
     .qc-gate-sub { font-family:Inter,sans-serif; font-size:13px; color:${BRAND.gray500}; margin-bottom:20px; line-height:1.5; }
@@ -135,12 +135,12 @@
     .qc-msg-bot {
       align-self:flex-start; background:${BRAND.white}; color:${BRAND.gray800};
       border:1px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
-      box-shadow:0 1px 3px rgba(0,0,0,0.04);
+      box-shadow:0 1px 4px rgba(0,0,0,0.08);
     }
     .qc-msg-user {
       align-self:flex-end; background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       color:${BRAND.white}; border-bottom-right-radius:4px;
-      box-shadow:0 2px 6px rgba(11,17,32,0.18);
+      box-shadow:0 2px 8px rgba(11,17,32,0.25);
     }
     .qc-msg-bot a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-msg-bot strong { font-weight:600; }
@@ -155,12 +155,13 @@
     /* === QUICK ACTIONS === */
     .qc-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
     .qc-action {
-      background:rgba(11,17,32,0.06); color:${BRAND.navy};
+      background:${BRAND.gray50}; color:${BRAND.navy};
       border:1.5px solid ${BRAND.gray300}; border-radius:20px;
       padding:7px 14px; font-family:Inter,sans-serif; font-size:12px; font-weight:500;
       cursor:pointer; transition:all .2s; outline:none;
+      box-shadow:0 1px 3px rgba(0,0,0,0.06);
     }
-    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; border-color:${BRAND.navy}; }
+    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; border-color:${BRAND.navy}; box-shadow:0 2px 6px rgba(11,17,32,0.2); }
 
     /* === TYPING === */
     .qc-typing {
