@@ -127,21 +127,22 @@
     .qc-messages::-webkit-scrollbar-thumb { background:${BRAND.gray300}; border-radius:2px; }
 
     .qc-msg {
-      max-width:72%; padding:11px 14px; border-radius:16px;
-      font-family:Inter,sans-serif; font-size:13.5px; line-height:1.55;
-      word-wrap:break-word; overflow-wrap:break-word; white-space:pre-wrap; animation:qfade .25s ease;
+      max-width:80%; padding:12px 16px; border-radius:16px;
+      font-family:Inter,sans-serif; font-size:14px; line-height:1.55;
+      word-wrap:break-word; overflow-wrap:break-word; animation:qfade .25s ease;
     }
     @keyframes qfade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
     .qc-msg-bot {
       align-self:flex-start; background:${BRAND.white}; color:${BRAND.gray800};
-      border:1px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.08);
+      border:1.5px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.06);
+      white-space:normal;
     }
     .qc-msg-user {
       align-self:flex-end; background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       color:${BRAND.white}; border-bottom-right-radius:4px;
       box-shadow:0 2px 8px rgba(11,17,32,0.25);
-      max-width:68%;
+      max-width:75%; white-space:pre-wrap;
     }
     .qc-msg-bot a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-msg-bot strong { font-weight:600; }
@@ -149,8 +150,8 @@
     .qc-msg-bot li { margin:3px 0; }
 
     /* === WELCOME === */
-    .qc-welcome { font-family:Inter,sans-serif; font-size:13.5px; line-height:1.5; color:${BRAND.gray700}; }
-    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:14px; color:${BRAND.navy}; margin-bottom:4px; display:block; }
+    .qc-welcome { font-family:Inter,sans-serif; font-size:14px; line-height:1.5; color:${BRAND.gray700}; }
+    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:15px; color:${BRAND.navy}; margin-bottom:6px; display:block; }
     .qc-welcome-body { display:block; }
 
     /* === QUICK ACTIONS === */
@@ -158,7 +159,7 @@
     .qc-action {
       background:${BRAND.white}; color:${BRAND.navy};
       border:1.5px solid ${BRAND.gray300}; border-radius:20px;
-      padding:6px 12px; font-family:Inter,sans-serif; font-size:11.5px; font-weight:500;
+      padding:7px 14px; font-family:Inter,sans-serif; font-size:12.5px; font-weight:500;
       cursor:pointer; transition:all .2s; outline:none;
       box-shadow:0 1px 3px rgba(0,0,0,0.08);
     }
@@ -201,7 +202,7 @@
 
     /* === EXPANDED === */
     .qexpanded .qc-textarea { min-height:64px; max-height:180px; }
-    .qexpanded .qc-msg { font-size:14px; max-width:68%; }
+    .qexpanded .qc-msg { font-size:14px; max-width:75%; }
 
     /* === MOBILE === */
     @media(max-width:480px){
@@ -210,7 +211,7 @@
         width:100vw; height:100vh; max-height:100vh; max-width:100vw;
         border-radius:0; position:fixed;
       }
-      #qarp-chat-popup .qc-messages { padding:14px 12px; gap:12px; }
+      #qarp-chat-popup .qc-messages { padding:14px 14px; gap:10px; }
       #qarp-chat-popup .qc-input-area {
         padding:12px 14px 16px;
         padding-bottom:max(16px,env(safe-area-inset-bottom));
@@ -224,11 +225,12 @@
       }
       #qarp-chat-popup .qc-textarea:focus { border-color:${BRAND.teal}; }
       #qarp-chat-popup .qc-send { width:52px; height:52px; border-radius:14px; }
-      #qarp-chat-popup .qc-action { padding:8px 14px; font-size:14px; border-radius:18px; }
-      #qarp-chat-popup .qc-msg { font-size:15px; padding:12px 14px; max-width:78%; line-height:1.55; }
-      #qarp-chat-popup .qc-msg-bot { border-width:1.5px; }
+      #qarp-chat-popup .qc-action { padding:8px 16px; font-size:13px; font-weight:600; border-radius:20px; border:2px solid ${BRAND.gray300}; background:${BRAND.white}; box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+      #qarp-chat-popup .qc-msg { font-size:15px; padding:12px 16px; max-width:85%; line-height:1.55; }
+      #qarp-chat-popup .qc-msg-bot { border-width:1.5px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+      #qarp-chat-popup .qc-msg-user { max-width:80%; }
       #qarp-chat-popup .qc-welcome { font-size:15px; line-height:1.55; }
-      #qarp-chat-popup .qc-welcome-title { font-size:16px; margin-bottom:6px; }
+      #qarp-chat-popup .qc-welcome-title { font-size:17px; font-weight:700; margin-bottom:8px; }
       #qarp-chat-bubble { bottom:16px; right:16px; width:58px; height:58px; }
       #qarp-chat-bubble.qopen { display:none; }
       .qc-expand-btn { display:none !important; }
