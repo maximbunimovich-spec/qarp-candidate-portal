@@ -1,5 +1,6 @@
 (function() {
   'use strict';
+  /* V6_MARKER_2026_03_16 */
 
   var API_URL = 'https://qarp-candidate-portal.onrender.com/api/chatbot';
   var LEAD_URL = 'https://qarp-candidate-portal.onrender.com/api/chatbot-lead';
@@ -10,6 +11,7 @@
     tealDark: '#0096B4',
     white: '#FFFFFF',
     gray50: '#F8FAFC',
+    gray100: '#F1F5F9',
     gray200: '#E2E8F0',
     gray300: '#CBD5E1',
     gray400: '#94A3B8',
@@ -51,8 +53,8 @@
     /* === POPUP === */
     #qarp-chat-popup {
       position:fixed; bottom:100px; right:24px; z-index:999999;
-      width:420px; max-width:calc(100vw - 32px);
-      height:600px; max-height:calc(100vh - 130px);
+      width:440px; max-width:calc(100vw - 32px);
+      height:620px; max-height:calc(100vh - 130px);
       background:${BRAND.white}; border-radius:20px;
       box-shadow:0 16px 60px rgba(11,17,32,0.22),0 4px 20px rgba(0,0,0,0.08);
       display:flex; flex-direction:column; overflow:hidden;
@@ -86,20 +88,21 @@
     /* === LEAD GATE === */
     .qc-gate {
       flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:32px 28px; text-align:center; background:${BRAND.gray50};
+      padding:24px 28px; text-align:center; background:${BRAND.white};
     }
-    .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:22px; font-weight:700; color:${BRAND.navy}; margin-bottom:6px; }
-    .qc-gate-sub { font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray500}; margin-bottom:24px; line-height:1.5; max-width:320px; }
+    .qc-gate-icon { font-size:44px; margin-bottom:12px; opacity:0.75; }
+    .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:24px; font-weight:700; color:${BRAND.navy}; margin-bottom:6px; }
+    .qc-gate-sub { font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray500}; margin-bottom:24px; line-height:1.55; max-width:340px; }
     .qc-gate-input {
-      width:100%; border:1.5px solid ${BRAND.gray300}; border-radius:12px;
-      padding:13px 16px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
+      width:100%; border:1.5px solid ${BRAND.gray200}; border-radius:12px;
+      padding:14px 16px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
       background:${BRAND.white}; outline:none; margin-bottom:10px; transition:border-color .2s,box-shadow .2s;
     }
     .qc-gate-input:focus { border-color:${BRAND.teal}; box-shadow:0 0 0 3px rgba(0,180,216,0.1); }
     .qc-gate-input::placeholder { color:${BRAND.gray400}; }
     .qc-gate-input.qerr { border-color:#EF4444; }
     .qc-gate-privacy {
-      display:flex; align-items:flex-start; gap:10px; margin:12px 0 18px; text-align:left; width:100%;
+      display:flex; align-items:flex-start; gap:10px; margin:10px 0 16px; text-align:left; width:100%;
     }
     .qc-gate-privacy input[type=checkbox] {
       width:20px; height:20px; margin-top:2px; accent-color:${BRAND.teal}; flex-shrink:0; cursor:pointer;
@@ -111,7 +114,7 @@
     .qc-gate-btn {
       width:100%; border:none; border-radius:12px; padding:14px;
       background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight}); color:${BRAND.white};
-      font-family:"DM Sans",sans-serif; font-size:15px; font-weight:600;
+      font-family:"DM Sans",sans-serif; font-size:16px; font-weight:600;
       cursor:pointer; transition:transform .15s,opacity .2s;
     }
     .qc-gate-btn:hover { transform:scale(1.02); }
@@ -120,23 +123,35 @@
 
     /* === MESSAGES === */
     .qc-messages {
-      flex:1; overflow-y:auto; overflow-x:hidden; padding:20px 18px; display:flex; flex-direction:column; gap:10px;
-      scroll-behavior:smooth; background:${BRAND.gray50};
+      flex:1; overflow-y:auto; overflow-x:hidden; padding:20px 20px; display:flex; flex-direction:column; gap:12px;
+      scroll-behavior:smooth; background:${BRAND.white};
     }
     .qc-messages::-webkit-scrollbar { width:4px; }
     .qc-messages::-webkit-scrollbar-thumb { background:${BRAND.gray300}; border-radius:2px; }
 
+    /* Welcome-only state: center content vertically */
+    .qc-messages.qc-welcome-state {
+      justify-content:center; align-items:center;
+    }
+
     .qc-msg {
-      max-width:85%; padding:12px 16px; border-radius:16px;
-      font-family:Inter,sans-serif; font-size:14.5px; line-height:1.6;
+      max-width:85%; padding:14px 18px; border-radius:18px;
+      font-family:Inter,sans-serif; font-size:15px; line-height:1.6;
       word-wrap:break-word; overflow-wrap:break-word; animation:qfade .25s ease;
     }
     @keyframes qfade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
     .qc-msg-bot {
       align-self:flex-start; background:${BRAND.white}; color:${BRAND.gray800};
-      border:1.5px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
-      box-shadow:0 2px 8px rgba(0,0,0,0.06);
+      border:none; border-bottom-left-radius:4px;
       white-space:normal;
+    }
+    .qc-msg-bot.qc-welcome-msg {
+      align-self:center; text-align:center; max-width:100%;
+      border:none; box-shadow:none; padding:0; background:transparent;
+    }
+    .qc-msg-bot:not(.qc-welcome-msg) {
+      border:1.5px solid ${BRAND.gray200};
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);
     }
     .qc-msg-user {
       align-self:flex-end; background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
@@ -150,25 +165,32 @@
     .qc-msg-bot li { margin:3px 0; }
 
     /* === WELCOME === */
-    .qc-welcome { font-family:Inter,sans-serif; font-size:14.5px; line-height:1.55; color:${BRAND.gray700}; }
-    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:700; font-size:17px; color:${BRAND.navy}; margin-bottom:8px; display:block; }
-    .qc-welcome-body { display:block; }
+    .qc-welcome-icon { font-size:48px; margin-bottom:16px; display:block; opacity:0.8; }
+    .qc-welcome { font-family:Inter,sans-serif; font-size:16px; line-height:1.55; color:${BRAND.gray500}; }
+    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:700; font-size:24px; color:${BRAND.navy}; margin-bottom:6px; display:block; letter-spacing:-0.3px; }
+    .qc-welcome-sub { display:block; font-size:15px; color:${BRAND.gray400}; margin-bottom:0; }
+    .qc-welcome-body { display:block; margin-bottom:4px; }
 
-    /* === QUICK ACTIONS === */
-    .qc-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+    /* === QUICK ACTIONS (pill buttons matching reference) === */
+    .qc-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; justify-content:center; }
     .qc-action {
-      background:${BRAND.white}; color:${BRAND.navy};
-      border:1.5px solid ${BRAND.gray300}; border-radius:22px;
-      padding:8px 16px; font-family:Inter,sans-serif; font-size:13px; font-weight:500;
-      cursor:pointer; transition:all .2s; outline:none;
-      box-shadow:0 1px 4px rgba(0,0,0,0.07);
+      background:${BRAND.white}; color:${BRAND.gray800};
+      border:1.5px solid ${BRAND.gray200}; border-radius:28px;
+      padding:10px 20px; font-family:Inter,sans-serif; font-size:15px; font-weight:500;
+      cursor:pointer; transition:all .2s ease; outline:none;
+      display:inline-flex; align-items:center; gap:8px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.04);
     }
-    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; border-color:${BRAND.navy}; box-shadow:0 2px 8px rgba(11,17,32,0.2); }
+    .qc-action:hover {
+      border-color:${BRAND.navy}; background:${BRAND.navy}; color:${BRAND.white};
+      box-shadow:0 3px 12px rgba(11,17,32,0.18); transform:translateY(-1px);
+    }
+    .qc-action-icon { font-size:16px; flex-shrink:0; }
 
     /* === TYPING === */
     .qc-typing {
       align-self:flex-start; display:flex; gap:5px; padding:14px 18px;
-      background:${BRAND.white}; border:1px solid ${BRAND.gray200};
+      background:${BRAND.white}; border:1.5px solid ${BRAND.gray200};
       border-radius:18px; border-bottom-left-radius:4px; animation:qfade .2s;
     }
     .qc-typing i { width:8px; height:8px; background:${BRAND.gray400}; border-radius:50%; display:block; animation:qbounce 1.4s infinite; }
@@ -181,17 +203,17 @@
       display:flex; align-items:flex-end; gap:10px; background:${BRAND.white}; flex-shrink:0;
     }
     .qc-textarea {
-      flex:1; border:1.5px solid ${BRAND.gray200}; border-radius:14px;
-      padding:12px 16px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
+      flex:1; border:1.5px solid ${BRAND.gray200}; border-radius:16px;
+      padding:14px 18px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
       background:${BRAND.gray50}; outline:none; resize:none;
-      min-height:50px; max-height:140px;
+      min-height:52px; max-height:140px;
       overflow-y:auto; transition:border-color .2s,background .2s; line-height:1.5;
     }
     .qc-textarea:focus { border-color:${BRAND.teal}; background:${BRAND.white}; }
-    .qc-textarea::placeholder { color:${BRAND.gray400}; }
+    .qc-textarea::placeholder { color:${BRAND.gray400}; font-size:15px; }
     .qc-send {
       width:48px; height:48px; border-radius:14px; border:none;
-      background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
+      background:linear-gradient(135deg,${BRAND.teal},${BRAND.tealDark});
       cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:transform .15s,opacity .2s; flex-shrink:0; outline:none;
     }
@@ -202,7 +224,7 @@
 
     /* === EXPANDED === */
     .qexpanded .qc-textarea { min-height:64px; max-height:180px; }
-    .qexpanded .qc-msg { font-size:15px; max-width:75%; }
+    .qexpanded .qc-msg { font-size:15.5px; max-width:75%; }
 
     /* === MOBILE === */
     @media(max-width:480px){
@@ -279,8 +301,9 @@
 
       <!-- LEAD GATE -->
       <div class="qc-gate" id="qarp-gate">
+        <div class="qc-gate-icon">\u{1F916}</div>
         <div class="qc-gate-logo">QARP Assistant</div>
-        <div class="qc-gate-sub">Your GxP compliance advisor. Ask about audits, ICH GCP E6(R3), training, and AI solutions.</div>
+        <div class="qc-gate-sub">Ask about audits, ICH GCP E6(R3), training, and AI solutions.</div>
         <input class="qc-gate-input" id="qarp-gate-name" type="text" placeholder="Your name" autocomplete="name">
         <input class="qc-gate-input" id="qarp-gate-email" type="email" placeholder="Work email" autocomplete="email">
         <div class="qc-gate-privacy">
@@ -292,10 +315,10 @@
       </div>
 
       <!-- CHAT (hidden until lead captured) -->
-      <div class="qc-messages" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot"><div class="qc-welcome"><span class="qc-welcome-title">Welcome!</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit">Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?">Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant">AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization">Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support">Consulting</button></div></div></div>
+      <div class="qc-messages qc-welcome-state" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot qc-welcome-msg"><div class="qc-welcome"><span class="qc-welcome-icon">\u{1F916}</span><span class="qc-welcome-title">QARP Assistant</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>Ask about GxP, ICH GCP, regulations, courses</span><span class="qc-welcome-sub">Your chats are saved securely</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit"><span class="qc-action-icon">\u{1F50D}</span> Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes"><span class="qc-action-icon">\u{1F4CB}</span> ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?"><span class="qc-action-icon">\u{1F393}</span> Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant"><span class="qc-action-icon">\u{1F4AC}</span> AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization"><span class="qc-action-icon">\u{1F3E2}</span> Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support"><span class="qc-action-icon">\u{1F4BC}</span> Consulting</button></div></div></div>
 
       <div class="qc-input-area" id="qarp-input-area" style="display:none">
-        <textarea class="qc-textarea" id="qarp-input" placeholder="Type your question..." rows="1"></textarea>
+        <textarea class="qc-textarea" id="qarp-input" placeholder="Ask QARP Assistant..." rows="1"></textarea>
         <button class="qc-send" id="qarp-send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
       </div>
     </div>
@@ -417,6 +440,9 @@
 
   // ===== Helpers =====
   function addMessage(text, isUser) {
+    // Remove welcome-state centering once conversation starts
+    messagesEl.classList.remove('qc-welcome-state');
+
     var div = document.createElement('div');
     div.className = 'qc-msg ' + (isUser ? 'qc-msg-user' : 'qc-msg-bot');
     div.innerHTML = isUser ? esc(text) : fmt(text);
