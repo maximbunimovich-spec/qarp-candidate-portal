@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  /* V6F_MARKER_2026_03_16 */
+  /* V6G_MARKER_2026_03_16 */
 
   var API_URL = 'https://qarp-candidate-portal.onrender.com/api/chatbot';
   var LEAD_URL = 'https://qarp-candidate-portal.onrender.com/api/chatbot-lead';
@@ -135,16 +135,17 @@
     }
 
     .qc-msg {
-      max-width:85%; padding:14px 18px; border-radius:18px;
-      font-family:Inter,sans-serif; font-size:15px; line-height:1.6;
+      max-width:85%; padding:18px 22px; border-radius:18px;
+      font-family:Inter,sans-serif; font-size:16px; line-height:1.65;
       word-wrap:break-word; overflow-wrap:break-word; animation:qfade .25s ease;
     }
     @keyframes qfade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
     .qc-msg-bot {
       align-self:center; background:${BRAND.white}; color:${BRAND.gray800};
-      border:1.5px solid ${BRAND.gray200}; border-radius:18px;
+      border:1.5px solid ${BRAND.gray200}; border-radius:20px;
       box-shadow:0 2px 8px rgba(0,0,0,0.06);
       white-space:normal; max-width:92%; text-align:left;
+      padding:20px 24px;
     }
     .qc-msg-bot.qc-welcome-msg {
       align-self:center; text-align:center; max-width:100%;
@@ -157,6 +158,7 @@
       color:${BRAND.white}; border-bottom-right-radius:4px;
       box-shadow:0 2px 8px rgba(11,17,32,0.25);
       max-width:78%; white-space:pre-wrap;
+      padding:16px 22px; font-size:16px;
     }
     .qc-msg-bot a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-msg-bot strong { font-weight:600; }
