@@ -28,16 +28,16 @@
   var style = document.createElement('style');
   style.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
-    #qarp-chat-widget * { box-sizing:border-box; margin:0; }
+    #qarp-chat-widget * { box-sizing:border-box; margin:0; padding:0; }
 
     /* === BUBBLE === */
     #qarp-chat-bubble {
       position:fixed; bottom:24px; right:24px; z-index:999998;
       width:64px; height:64px; border-radius:50%;
-      background:linear-gradient(135deg,${BRAND.teal},${BRAND.tealDark});
-      border:none; cursor:pointer; outline:none;
+      background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
+      border:2px solid ${BRAND.teal}; cursor:pointer; outline:none;
       display:flex; align-items:center; justify-content:center;
-      box-shadow:0 4px 20px rgba(0,180,216,0.4),0 2px 8px rgba(0,0,0,0.12);
+      box-shadow:0 4px 20px rgba(11,17,32,0.5),0 2px 8px rgba(0,0,0,0.15);
       transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
     }
     #qarp-chat-bubble:hover { transform:scale(1.07); }
@@ -91,11 +91,11 @@
     .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:22px; font-weight:700; color:${BRAND.navy}; margin-bottom:6px; }
     .qc-gate-sub { font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray500}; margin-bottom:24px; line-height:1.5; }
     .qc-gate-input {
-      width:100%; border:2px solid ${BRAND.gray400}; border-radius:12px;
+      width:100%; border:2px solid ${BRAND.gray300}; border-radius:12px;
       padding:14px 16px; font-family:Inter,sans-serif; font-size:16px; color:${BRAND.gray800};
       background:${BRAND.white}; outline:none; margin-bottom:10px; transition:border-color .2s,box-shadow .2s;
     }
-    .qc-gate-input:focus { border-color:${BRAND.teal}; box-shadow:0 0 0 3px rgba(0,180,216,0.15); }
+    .qc-gate-input:focus { border-color:${BRAND.teal}; box-shadow:0 0 0 3px rgba(0,180,216,0.1); }
     .qc-gate-input::placeholder { color:${BRAND.gray400}; }
     .qc-gate-input.qerr { border-color:#EF4444; }
     .qc-gate-privacy {
@@ -110,7 +110,7 @@
     .qc-gate-privacy a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-gate-btn {
       width:100%; border:none; border-radius:12px; padding:14px;
-      background:linear-gradient(135deg,${BRAND.teal},${BRAND.tealDark}); color:${BRAND.white};
+      background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight}); color:${BRAND.white};
       font-family:"DM Sans",sans-serif; font-size:16px; font-weight:600;
       cursor:pointer; transition:transform .15s,opacity .2s;
     }
@@ -137,7 +137,7 @@
       border:1px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
     }
     .qc-msg-user {
-      align-self:flex-end; background:linear-gradient(135deg,${BRAND.teal},${BRAND.tealDark});
+      align-self:flex-end; background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       color:${BRAND.white}; border-bottom-right-radius:4px;
     }
     .qc-msg-bot a { color:${BRAND.teal}; text-decoration:underline; }
@@ -146,19 +146,19 @@
     .qc-msg-bot li { margin:3px 0; }
 
     /* === WELCOME === */
-    .qc-welcome { font-family:Inter,sans-serif; font-size:15px; line-height:1.65; color:${BRAND.gray700}; white-space:normal; }
+    .qc-welcome { font-family:Inter,sans-serif; font-size:15px; line-height:1.65; color:${BRAND.gray700}; }
     .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:16px; color:${BRAND.navy}; margin-bottom:8px; display:block; }
     .qc-welcome-body { display:block; }
 
     /* === QUICK ACTIONS === */
-    .qc-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; white-space:normal; }
+    .qc-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
     .qc-action {
-      background:${BRAND.white}; color:${BRAND.tealDark};
-      border:1.5px solid ${BRAND.teal}; border-radius:22px;
+      background:${BRAND.white}; color:${BRAND.navy};
+      border:1.5px solid ${BRAND.navy}; border-radius:22px;
       padding:8px 14px; font-family:Inter,sans-serif; font-size:13px; font-weight:500;
       cursor:pointer; transition:all .2s; outline:none;
     }
-    .qc-action:hover { background:${BRAND.teal}; color:${BRAND.white}; }
+    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; }
 
     /* === TYPING === */
     .qc-typing {
@@ -176,17 +176,17 @@
       display:flex; align-items:flex-end; gap:10px; background:${BRAND.white}; flex-shrink:0;
     }
     .qc-textarea {
-      flex:1; border:2px solid ${BRAND.gray300}; border-radius:16px;
+      flex:1; border:2px solid ${BRAND.gray200}; border-radius:16px;
       padding:14px 16px; font-family:Inter,sans-serif; font-size:16px; color:${BRAND.gray800};
       background:${BRAND.gray50}; outline:none; resize:none;
       min-height:56px; max-height:140px;
-      overflow-y:auto; transition:border-color .2s,background .2s,box-shadow .2s; line-height:1.5;
+      overflow-y:auto; transition:border-color .2s,background .2s; line-height:1.5;
     }
     .qc-textarea:focus { border-color:${BRAND.teal}; background:${BRAND.white}; }
     .qc-textarea::placeholder { color:${BRAND.gray400}; }
     .qc-send {
       width:50px; height:50px; border-radius:14px; border:none;
-      background:linear-gradient(135deg,${BRAND.teal},${BRAND.tealDark});
+      background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:transform .15s,opacity .2s; flex-shrink:0; outline:none;
     }
@@ -215,7 +215,7 @@
       #qarp-chat-popup .qc-textarea {
         font-size:17px; min-height:52px; max-height:120px;
         padding:14px 16px; border-radius:14px;
-        border:2px solid ${BRAND.gray400};
+        border:2px solid ${BRAND.gray300};
         background:${BRAND.white};
       }
       #qarp-chat-popup .qc-textarea:focus { border-color:${BRAND.teal}; }
@@ -230,21 +230,21 @@
       .qc-expand-btn { display:none !important; }
 
       /* Lead gate — push content to top on mobile */
-      #qarp-chat-popup .qc-gate {
-        justify-content:flex-start !important; padding:36px 24px 24px !important;
+      .qc-gate {
+        justify-content:flex-start; padding:36px 24px 24px;
       }
-      #qarp-chat-popup .qc-gate-logo { font-size:24px !important; margin-bottom:8px !important; }
-      #qarp-chat-popup .qc-gate-sub { font-size:15px !important; margin-bottom:28px !important; line-height:1.55 !important; }
-      #qarp-chat-popup .qc-gate-input {
-        font-size:17px !important; padding:16px 18px !important;
-        border:2px solid ${BRAND.gray400} !important; border-radius:14px !important;
-        margin-bottom:12px !important;
+      .qc-gate-logo { font-size:24px; margin-bottom:8px; }
+      .qc-gate-sub { font-size:15px; margin-bottom:28px; line-height:1.55; }
+      .qc-gate-input {
+        font-size:17px; padding:16px 18px;
+        border:2px solid ${BRAND.gray300}; border-radius:14px;
+        margin-bottom:12px;
       }
-      #qarp-chat-popup .qc-gate-input:focus { border-color:${BRAND.teal} !important; box-shadow:0 0 0 3px rgba(0,180,216,0.12) !important; }
-      #qarp-chat-popup .qc-gate-privacy { margin:14px 0 20px !important; }
-      #qarp-chat-popup .qc-gate-privacy input[type=checkbox] { width:22px !important; height:22px !important; }
-      #qarp-chat-popup .qc-gate-privacy label { font-size:14px !important; line-height:1.45 !important; }
-      #qarp-chat-popup .qc-gate-btn { padding:16px !important; font-size:17px !important; border-radius:14px !important; }
+      .qc-gate-input:focus { border-color:${BRAND.teal}; box-shadow:0 0 0 3px rgba(0,180,216,0.12); }
+      .qc-gate-privacy { margin:14px 0 20px; }
+      .qc-gate-privacy input[type=checkbox] { width:22px; height:22px; }
+      .qc-gate-privacy label { font-size:14px; line-height:1.45; }
+      .qc-gate-btn { padding:16px; font-size:17px; border-radius:14px; }
     }
   `;
   document.head.appendChild(style);
@@ -274,12 +274,12 @@
       <!-- LEAD GATE -->
       <div class="qc-gate" id="qarp-gate">
         <div class="qc-gate-logo">QARP Assistant</div>
-        <div class="qc-gate-sub">Your assistant at The QARP. Ask about audits, training, GCP Auditor School, and AI solutions.</div>
+        <div class="qc-gate-sub">Your GxP compliance advisor. Ask about audits, ICH GCP E6(R3), training, and AI solutions.</div>
         <input class="qc-gate-input" id="qarp-gate-name" type="text" placeholder="Your name" autocomplete="name">
         <input class="qc-gate-input" id="qarp-gate-email" type="email" placeholder="Work email" autocomplete="email">
         <div class="qc-gate-privacy">
           <input type="checkbox" id="qarp-gate-privacy">
-          <label for="qarp-gate-privacy">I agree to the <a href="https://theqarpacademy.pro/privacy" target="_blank">Privacy Policy</a> and consent to receive follow-up communications from The QARP.</label>
+          <label for="qarp-gate-privacy">I agree to the <a href="https://theqarp.com/privacy" target="_blank">Privacy Policy</a> and consent to receive follow-up communications from The QARP.</label>
         </div>
         <button class="qc-gate-btn" id="qarp-gate-submit">Start Chat</button>
         <div class="qc-gate-err" id="qarp-gate-err" style="display:none"></div>
@@ -287,7 +287,20 @@
 
       <!-- CHAT (hidden until lead captured) -->
       <div class="qc-messages" id="qarp-messages" style="display:none">
-        <div class="qc-msg qc-msg-bot" style="white-space:normal"><div class="qc-welcome"><span class="qc-welcome-title">Welcome!</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="Tell me about the GCP Auditor School">Auditor School</button><button class="qc-action" data-msg="I need help with a GxP audit">Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?">Training</button><button class="qc-action" data-msg="Tell me about your AI solutions">AI Solutions</button><button class="qc-action" data-msg="I need GxP consulting support">Consulting</button></div></div>
+        <div class="qc-msg qc-msg-bot">
+          <div class="qc-welcome">
+            <span class="qc-welcome-title">Welcome!</span>
+            <span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span>
+          </div>
+          <div class="qc-actions" id="qarp-quick-actions">
+            <button class="qc-action" data-msg="I need help with a GxP audit">Audits</button>
+            <button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button>
+            <button class="qc-action" data-msg="What training courses do you offer?">Training</button>
+            <button class="qc-action" data-msg="Tell me about your GxP AI Assistant">AI Assistant</button>
+            <button class="qc-action" data-msg="We want to implement Enterprise AI for our organization">Enterprise AI</button>
+            <button class="qc-action" data-msg="I need GxP consulting support">Consulting</button>
+          </div>
+        </div>
       </div>
 
       <div class="qc-input-area" id="qarp-input-area" style="display:none">
