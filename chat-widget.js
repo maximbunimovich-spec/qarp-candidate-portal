@@ -1,6 +1,6 @@
 (function() {
   'use strict';
-  /* V6B_MARKER_2026_03_16 */
+  /* V6C_MARKER_2026_03_16 */
 
   var API_URL = 'https://qarp-candidate-portal.onrender.com/api/chatbot';
   var LEAD_URL = 'https://qarp-candidate-portal.onrender.com/api/chatbot-lead';
@@ -206,13 +206,13 @@
       flex:1; border:1.5px solid ${BRAND.gray200}; border-radius:16px;
       padding:14px 18px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
       background:${BRAND.gray50}; outline:none; resize:none;
-      min-height:64px; max-height:160px;
+      min-height:80px; max-height:160px;
       overflow-y:auto; transition:border-color .2s,background .2s; line-height:1.5;
     }
     .qc-textarea:focus { border-color:${BRAND.teal}; background:${BRAND.white}; }
     .qc-textarea::placeholder { color:${BRAND.gray400}; font-size:15px; }
     .qc-send {
-      width:48px; height:48px; border-radius:14px; border:none;
+      width:50px; height:50px; border-radius:14px; border:none;
       background:linear-gradient(135deg,${BRAND.teal},${BRAND.tealDark});
       cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:transform .15s,opacity .2s; flex-shrink:0; outline:none;
@@ -303,7 +303,7 @@
       <div class="qc-gate" id="qarp-gate">
         <div class="qc-gate-icon">\u{1F916}</div>
         <div class="qc-gate-logo">QARP Assistant</div>
-        <div class="qc-gate-sub">Ask about audits, ICH GCP E6(R3), training, and AI solutions.</div>
+        <div class="qc-gate-sub">Your smart assistant for The QARP services, courses, and more.</div>
         <input class="qc-gate-input" id="qarp-gate-name" type="text" placeholder="Your name" autocomplete="name">
         <input class="qc-gate-input" id="qarp-gate-email" type="email" placeholder="Work email" autocomplete="email">
         <div class="qc-gate-privacy">
@@ -315,10 +315,10 @@
       </div>
 
       <!-- CHAT (hidden until lead captured) -->
-      <div class="qc-messages qc-welcome-state" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot qc-welcome-msg"><div class="qc-welcome"><span class="qc-welcome-icon">\u{1F916}</span><span class="qc-welcome-title">QARP Assistant</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>Ask about GxP, ICH GCP, regulations, courses</span><span class="qc-welcome-sub">Your chats are saved securely</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit"><span class="qc-action-icon">\u{1F50D}</span> Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes"><span class="qc-action-icon">\u{1F4CB}</span> ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?"><span class="qc-action-icon">\u{1F393}</span> Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant"><span class="qc-action-icon">\u{1F4AC}</span> AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization"><span class="qc-action-icon">\u{1F3E2}</span> Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support"><span class="qc-action-icon">\u{1F4BC}</span> Consulting</button></div></div></div>
+      <div class="qc-messages qc-welcome-state" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot qc-welcome-msg"><div class="qc-welcome"><span class="qc-welcome-icon">\u{1F916}</span><span class="qc-welcome-title">QARP Assistant</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>Ask about The QARP and our services</span><span class="qc-welcome-sub">Courses, audits, consulting, AI solutions</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit"><span class="qc-action-icon">\u{1F50D}</span> Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes"><span class="qc-action-icon">\u{1F4CB}</span> ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?"><span class="qc-action-icon">\u{1F393}</span> Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant"><span class="qc-action-icon">\u{1F4AC}</span> AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization"><span class="qc-action-icon">\u{1F3E2}</span> Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support"><span class="qc-action-icon">\u{1F4BC}</span> Consulting</button></div></div></div>
 
       <div class="qc-input-area" id="qarp-input-area" style="display:none">
-        <textarea class="qc-textarea" id="qarp-input" placeholder="Ask QARP Assistant..." rows="1"></textarea>
+        <textarea class="qc-textarea" id="qarp-input" placeholder="Ask about The QARP..." rows="1"></textarea>
         <button class="qc-send" id="qarp-send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
       </div>
     </div>
