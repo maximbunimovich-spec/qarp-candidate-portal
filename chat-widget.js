@@ -51,8 +51,8 @@
     /* === POPUP === */
     #qarp-chat-popup {
       position:fixed; bottom:100px; right:24px; z-index:999999;
-      width:430px; max-width:calc(100vw - 32px);
-      height:620px; max-height:calc(100vh - 130px);
+      width:420px; max-width:calc(100vw - 32px);
+      height:600px; max-height:calc(100vh - 130px);
       background:${BRAND.white}; border-radius:20px;
       box-shadow:0 16px 60px rgba(11,17,32,0.22),0 4px 20px rgba(0,0,0,0.08);
       display:flex; flex-direction:column; overflow:hidden;
@@ -69,7 +69,7 @@
     /* === HEADER === */
     .qc-header {
       background:linear-gradient(135deg,${BRAND.navy} 0%,${BRAND.navyLight} 100%);
-      padding:14px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0;
+      padding:14px 18px; display:flex; align-items:center; gap:12px; flex-shrink:0;
     }
     .qc-header-icon { width:40px; height:40px; border-radius:10px; background:${BRAND.teal}; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .qc-header-icon svg { width:22px; height:22px; fill:${BRAND.white}; }
@@ -83,23 +83,23 @@
     .qc-hbtn:hover { background:rgba(255,255,255,.2); }
     .qc-hbtn svg { width:16px; height:16px; fill:${BRAND.gray400}; }
 
-    /* === LEAD GATE (before chat) === */
+    /* === LEAD GATE === */
     .qc-gate {
-      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-      padding:40px 24px 24px; text-align:center; background:${BRAND.gray50};
+      flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:32px 28px; text-align:center; background:${BRAND.gray50};
     }
-    .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:20px; font-weight:700; color:${BRAND.navy}; margin-bottom:4px; }
-    .qc-gate-sub { font-family:Inter,sans-serif; font-size:13px; color:${BRAND.gray500}; margin-bottom:20px; line-height:1.5; }
+    .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:22px; font-weight:700; color:${BRAND.navy}; margin-bottom:6px; }
+    .qc-gate-sub { font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray500}; margin-bottom:24px; line-height:1.5; max-width:320px; }
     .qc-gate-input {
-      width:100%; border:1.5px solid ${BRAND.gray300}; border-radius:10px;
-      padding:12px 14px; font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray800};
-      background:${BRAND.white}; outline:none; margin-bottom:8px; transition:border-color .2s,box-shadow .2s;
+      width:100%; border:1.5px solid ${BRAND.gray300}; border-radius:12px;
+      padding:13px 16px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
+      background:${BRAND.white}; outline:none; margin-bottom:10px; transition:border-color .2s,box-shadow .2s;
     }
     .qc-gate-input:focus { border-color:${BRAND.teal}; box-shadow:0 0 0 3px rgba(0,180,216,0.1); }
     .qc-gate-input::placeholder { color:${BRAND.gray400}; }
     .qc-gate-input.qerr { border-color:#EF4444; }
     .qc-gate-privacy {
-      display:flex; align-items:flex-start; gap:8px; margin:10px 0 16px; text-align:left; width:100%;
+      display:flex; align-items:flex-start; gap:10px; margin:12px 0 18px; text-align:left; width:100%;
     }
     .qc-gate-privacy input[type=checkbox] {
       width:20px; height:20px; margin-top:2px; accent-color:${BRAND.teal}; flex-shrink:0; cursor:pointer;
@@ -109,7 +109,7 @@
     }
     .qc-gate-privacy a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-gate-btn {
-      width:100%; border:none; border-radius:10px; padding:12px;
+      width:100%; border:none; border-radius:12px; padding:14px;
       background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight}); color:${BRAND.white};
       font-family:"DM Sans",sans-serif; font-size:15px; font-weight:600;
       cursor:pointer; transition:transform .15s,opacity .2s;
@@ -120,29 +120,29 @@
 
     /* === MESSAGES === */
     .qc-messages {
-      flex:1; overflow-y:auto; overflow-x:hidden; padding:16px; display:flex; flex-direction:column; gap:8px;
+      flex:1; overflow-y:auto; overflow-x:hidden; padding:20px 18px; display:flex; flex-direction:column; gap:10px;
       scroll-behavior:smooth; background:${BRAND.gray50};
     }
     .qc-messages::-webkit-scrollbar { width:4px; }
     .qc-messages::-webkit-scrollbar-thumb { background:${BRAND.gray300}; border-radius:2px; }
 
     .qc-msg {
-      max-width:80%; padding:12px 16px; border-radius:16px;
-      font-family:Inter,sans-serif; font-size:14px; line-height:1.55;
+      max-width:85%; padding:12px 16px; border-radius:16px;
+      font-family:Inter,sans-serif; font-size:14.5px; line-height:1.6;
       word-wrap:break-word; overflow-wrap:break-word; animation:qfade .25s ease;
     }
     @keyframes qfade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
     .qc-msg-bot {
       align-self:flex-start; background:${BRAND.white}; color:${BRAND.gray800};
       border:1.5px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.06);
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);
       white-space:normal;
     }
     .qc-msg-user {
       align-self:flex-end; background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       color:${BRAND.white}; border-bottom-right-radius:4px;
       box-shadow:0 2px 8px rgba(11,17,32,0.25);
-      max-width:75%; white-space:pre-wrap;
+      max-width:78%; white-space:pre-wrap;
     }
     .qc-msg-bot a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-msg-bot strong { font-weight:600; }
@@ -150,20 +150,20 @@
     .qc-msg-bot li { margin:3px 0; }
 
     /* === WELCOME === */
-    .qc-welcome { font-family:Inter,sans-serif; font-size:14px; line-height:1.5; color:${BRAND.gray700}; }
-    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:15px; color:${BRAND.navy}; margin-bottom:6px; display:block; }
+    .qc-welcome { font-family:Inter,sans-serif; font-size:14.5px; line-height:1.55; color:${BRAND.gray700}; }
+    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:700; font-size:17px; color:${BRAND.navy}; margin-bottom:8px; display:block; }
     .qc-welcome-body { display:block; }
 
     /* === QUICK ACTIONS === */
-    .qc-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+    .qc-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
     .qc-action {
       background:${BRAND.white}; color:${BRAND.navy};
-      border:1.5px solid ${BRAND.gray300}; border-radius:20px;
-      padding:7px 14px; font-family:Inter,sans-serif; font-size:12.5px; font-weight:500;
+      border:1.5px solid ${BRAND.gray300}; border-radius:22px;
+      padding:8px 16px; font-family:Inter,sans-serif; font-size:13px; font-weight:500;
       cursor:pointer; transition:all .2s; outline:none;
-      box-shadow:0 1px 3px rgba(0,0,0,0.08);
+      box-shadow:0 1px 4px rgba(0,0,0,0.07);
     }
-    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; border-color:${BRAND.navy}; box-shadow:0 2px 6px rgba(11,17,32,0.2); }
+    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; border-color:${BRAND.navy}; box-shadow:0 2px 8px rgba(11,17,32,0.2); }
 
     /* === TYPING === */
     .qc-typing {
@@ -177,20 +177,20 @@
 
     /* === INPUT === */
     .qc-input-area {
-      padding:12px 14px 14px; border-top:1px solid ${BRAND.gray200};
-      display:flex; align-items:flex-end; gap:8px; background:${BRAND.white}; flex-shrink:0;
+      padding:14px 16px 16px; border-top:1px solid ${BRAND.gray200};
+      display:flex; align-items:flex-end; gap:10px; background:${BRAND.white}; flex-shrink:0;
     }
     .qc-textarea {
       flex:1; border:1.5px solid ${BRAND.gray200}; border-radius:14px;
-      padding:10px 14px; font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray800};
+      padding:12px 16px; font-family:Inter,sans-serif; font-size:15px; color:${BRAND.gray800};
       background:${BRAND.gray50}; outline:none; resize:none;
-      min-height:44px; max-height:120px;
+      min-height:50px; max-height:140px;
       overflow-y:auto; transition:border-color .2s,background .2s; line-height:1.5;
     }
     .qc-textarea:focus { border-color:${BRAND.teal}; background:${BRAND.white}; }
     .qc-textarea::placeholder { color:${BRAND.gray400}; }
     .qc-send {
-      width:44px; height:44px; border-radius:12px; border:none;
+      width:48px; height:48px; border-radius:14px; border:none;
       background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:transform .15s,opacity .2s; flex-shrink:0; outline:none;
@@ -202,7 +202,7 @@
 
     /* === EXPANDED === */
     .qexpanded .qc-textarea { min-height:64px; max-height:180px; }
-    .qexpanded .qc-msg { font-size:14px; max-width:75%; }
+    .qexpanded .qc-msg { font-size:15px; max-width:75%; }
 
     /* === MOBILE === */
     @media(max-width:480px){
@@ -235,7 +235,7 @@
       #qarp-chat-bubble.qopen { display:none; }
       .qc-expand-btn { display:none !important; }
 
-      /* Lead gate — push content to top on mobile */
+      /* Lead gate on mobile */
       .qc-gate {
         justify-content:flex-start; padding:36px 24px 24px;
       }
@@ -292,22 +292,7 @@
       </div>
 
       <!-- CHAT (hidden until lead captured) -->
-      <div class="qc-messages" id="qarp-messages" style="display:none">
-        <div class="qc-msg qc-msg-bot">
-          <div class="qc-welcome">
-            <span class="qc-welcome-title">Welcome!</span>
-            <span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span>
-          </div>
-          <div class="qc-actions" id="qarp-quick-actions">
-            <button class="qc-action" data-msg="I need help with a GxP audit">Audits</button>
-            <button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button>
-            <button class="qc-action" data-msg="What training courses do you offer?">Training</button>
-            <button class="qc-action" data-msg="Tell me about your GxP AI Assistant">AI Assistant</button>
-            <button class="qc-action" data-msg="We want to implement Enterprise AI for our organization">Enterprise AI</button>
-            <button class="qc-action" data-msg="I need GxP consulting support">Consulting</button>
-          </div>
-        </div>
-      </div>
+      <div class="qc-messages" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot"><div class="qc-welcome"><span class="qc-welcome-title">Welcome!</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>How can I help you today?</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit">Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes">ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?">Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant">AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization">Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support">Consulting</button></div></div></div>
 
       <div class="qc-input-area" id="qarp-input-area" style="display:none">
         <textarea class="qc-textarea" id="qarp-input" placeholder="Type your question..." rows="1"></textarea>
