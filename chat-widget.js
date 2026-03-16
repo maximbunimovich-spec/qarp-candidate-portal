@@ -86,20 +86,20 @@
     /* === LEAD GATE (before chat) === */
     .qc-gate {
       flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-      padding:32px 28px; text-align:center; background:${BRAND.gray50};
+      padding:28px 24px; text-align:center; background:${BRAND.gray50};
     }
-    .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:22px; font-weight:700; color:${BRAND.navy}; margin-bottom:6px; }
-    .qc-gate-sub { font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray500}; margin-bottom:24px; line-height:1.5; }
+    .qc-gate-logo { font-family:"DM Sans",sans-serif; font-size:20px; font-weight:700; color:${BRAND.navy}; margin-bottom:4px; }
+    .qc-gate-sub { font-family:Inter,sans-serif; font-size:13px; color:${BRAND.gray500}; margin-bottom:20px; line-height:1.5; }
     .qc-gate-input {
-      width:100%; border:2px solid ${BRAND.gray300}; border-radius:12px;
-      padding:14px 16px; font-family:Inter,sans-serif; font-size:16px; color:${BRAND.gray800};
-      background:${BRAND.white}; outline:none; margin-bottom:10px; transition:border-color .2s,box-shadow .2s;
+      width:100%; border:1.5px solid ${BRAND.gray300}; border-radius:10px;
+      padding:12px 14px; font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray800};
+      background:${BRAND.white}; outline:none; margin-bottom:8px; transition:border-color .2s,box-shadow .2s;
     }
     .qc-gate-input:focus { border-color:${BRAND.teal}; box-shadow:0 0 0 3px rgba(0,180,216,0.1); }
     .qc-gate-input::placeholder { color:${BRAND.gray400}; }
     .qc-gate-input.qerr { border-color:#EF4444; }
     .qc-gate-privacy {
-      display:flex; align-items:flex-start; gap:10px; margin:12px 0 18px; text-align:left; width:100%;
+      display:flex; align-items:flex-start; gap:8px; margin:10px 0 16px; text-align:left; width:100%;
     }
     .qc-gate-privacy input[type=checkbox] {
       width:20px; height:20px; margin-top:2px; accent-color:${BRAND.teal}; flex-shrink:0; cursor:pointer;
@@ -109,9 +109,9 @@
     }
     .qc-gate-privacy a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-gate-btn {
-      width:100%; border:none; border-radius:12px; padding:14px;
+      width:100%; border:none; border-radius:10px; padding:12px;
       background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight}); color:${BRAND.white};
-      font-family:"DM Sans",sans-serif; font-size:16px; font-weight:600;
+      font-family:"DM Sans",sans-serif; font-size:15px; font-weight:600;
       cursor:pointer; transition:transform .15s,opacity .2s;
     }
     .qc-gate-btn:hover { transform:scale(1.02); }
@@ -120,25 +120,27 @@
 
     /* === MESSAGES === */
     .qc-messages {
-      flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;
+      flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:8px;
       scroll-behavior:smooth; background:${BRAND.gray50};
     }
     .qc-messages::-webkit-scrollbar { width:4px; }
     .qc-messages::-webkit-scrollbar-thumb { background:${BRAND.gray300}; border-radius:2px; }
 
     .qc-msg {
-      max-width:85%; padding:12px 16px; border-radius:18px;
-      font-family:Inter,sans-serif; font-size:15px; line-height:1.65;
-      word-wrap:break-word; white-space:pre-wrap; animation:qfade .25s ease;
+      max-width:78%; padding:12px 16px; border-radius:18px;
+      font-family:Inter,sans-serif; font-size:14px; line-height:1.6;
+      word-wrap:break-word; overflow-wrap:break-word; white-space:pre-wrap; animation:qfade .25s ease;
     }
     @keyframes qfade { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
     .qc-msg-bot {
       align-self:flex-start; background:${BRAND.white}; color:${BRAND.gray800};
       border:1px solid ${BRAND.gray200}; border-bottom-left-radius:4px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.04);
     }
     .qc-msg-user {
       align-self:flex-end; background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       color:${BRAND.white}; border-bottom-right-radius:4px;
+      box-shadow:0 2px 6px rgba(11,17,32,0.18);
     }
     .qc-msg-bot a { color:${BRAND.teal}; text-decoration:underline; }
     .qc-msg-bot strong { font-weight:600; }
@@ -146,19 +148,19 @@
     .qc-msg-bot li { margin:3px 0; }
 
     /* === WELCOME === */
-    .qc-welcome { font-family:Inter,sans-serif; font-size:15px; line-height:1.65; color:${BRAND.gray700}; }
-    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:16px; color:${BRAND.navy}; margin-bottom:8px; display:block; }
+    .qc-welcome { font-family:Inter,sans-serif; font-size:14px; line-height:1.55; color:${BRAND.gray700}; }
+    .qc-welcome-title { font-family:"DM Sans",sans-serif; font-weight:600; font-size:15px; color:${BRAND.navy}; margin-bottom:6px; display:block; }
     .qc-welcome-body { display:block; }
 
     /* === QUICK ACTIONS === */
     .qc-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
     .qc-action {
-      background:${BRAND.white}; color:${BRAND.navy};
-      border:1.5px solid ${BRAND.navy}; border-radius:22px;
-      padding:8px 14px; font-family:Inter,sans-serif; font-size:13px; font-weight:500;
+      background:rgba(11,17,32,0.06); color:${BRAND.navy};
+      border:1.5px solid ${BRAND.gray300}; border-radius:20px;
+      padding:7px 14px; font-family:Inter,sans-serif; font-size:12px; font-weight:500;
       cursor:pointer; transition:all .2s; outline:none;
     }
-    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; }
+    .qc-action:hover { background:${BRAND.navy}; color:${BRAND.white}; border-color:${BRAND.navy}; }
 
     /* === TYPING === */
     .qc-typing {
@@ -172,20 +174,20 @@
 
     /* === INPUT === */
     .qc-input-area {
-      padding:14px 16px 16px; border-top:1px solid ${BRAND.gray200};
-      display:flex; align-items:flex-end; gap:10px; background:${BRAND.white}; flex-shrink:0;
+      padding:12px 14px 14px; border-top:1px solid ${BRAND.gray200};
+      display:flex; align-items:flex-end; gap:8px; background:${BRAND.white}; flex-shrink:0;
     }
     .qc-textarea {
-      flex:1; border:2px solid ${BRAND.gray200}; border-radius:16px;
-      padding:14px 16px; font-family:Inter,sans-serif; font-size:16px; color:${BRAND.gray800};
+      flex:1; border:1.5px solid ${BRAND.gray200}; border-radius:14px;
+      padding:10px 14px; font-family:Inter,sans-serif; font-size:14px; color:${BRAND.gray800};
       background:${BRAND.gray50}; outline:none; resize:none;
-      min-height:56px; max-height:140px;
+      min-height:44px; max-height:120px;
       overflow-y:auto; transition:border-color .2s,background .2s; line-height:1.5;
     }
     .qc-textarea:focus { border-color:${BRAND.teal}; background:${BRAND.white}; }
     .qc-textarea::placeholder { color:${BRAND.gray400}; }
     .qc-send {
-      width:50px; height:50px; border-radius:14px; border:none;
+      width:44px; height:44px; border-radius:12px; border:none;
       background:linear-gradient(135deg,${BRAND.navy},${BRAND.navyLight});
       cursor:pointer; display:flex; align-items:center; justify-content:center;
       transition:transform .15s,opacity .2s; flex-shrink:0; outline:none;
@@ -197,7 +199,7 @@
 
     /* === EXPANDED === */
     .qexpanded .qc-textarea { min-height:64px; max-height:180px; }
-    .qexpanded .qc-msg { font-size:15px; max-width:80%; }
+    .qexpanded .qc-msg { font-size:14px; max-width:72%; }
 
     /* === MOBILE === */
     @media(max-width:480px){
@@ -220,11 +222,11 @@
       }
       #qarp-chat-popup .qc-textarea:focus { border-color:${BRAND.teal}; }
       #qarp-chat-popup .qc-send { width:52px; height:52px; border-radius:14px; }
-      #qarp-chat-popup .qc-action { padding:10px 16px; font-size:15px; border-radius:20px; }
-      #qarp-chat-popup .qc-msg { font-size:16px; padding:14px 16px; max-width:88%; line-height:1.6; }
+      #qarp-chat-popup .qc-action { padding:8px 14px; font-size:14px; border-radius:18px; }
+      #qarp-chat-popup .qc-msg { font-size:15px; padding:12px 14px; max-width:82%; line-height:1.55; }
       #qarp-chat-popup .qc-msg-bot { border-width:1.5px; }
-      #qarp-chat-popup .qc-welcome { font-size:16px; line-height:1.6; }
-      #qarp-chat-popup .qc-welcome-title { font-size:17px; margin-bottom:8px; }
+      #qarp-chat-popup .qc-welcome { font-size:15px; line-height:1.55; }
+      #qarp-chat-popup .qc-welcome-title { font-size:16px; margin-bottom:6px; }
       #qarp-chat-bubble { bottom:16px; right:16px; width:58px; height:58px; }
       #qarp-chat-bubble.qopen { display:none; }
       .qc-expand-btn { display:none !important; }
