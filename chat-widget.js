@@ -291,7 +291,7 @@
       <div class="qc-header">
         <div class="qc-header-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div>
         <div class="qc-header-text">
-          <h3>QARP Assistant</h3>
+          <h3>QARP AI Assistant</h3>
           <p><span class="qc-dot"></span> Online</p>
         </div>
         <div class="qc-header-btns">
@@ -303,20 +303,20 @@
       <!-- LEAD GATE -->
       <div class="qc-gate" id="qarp-gate">
         <div class="qc-gate-icon">\u{1F916}</div>
-        <div class="qc-gate-logo">QARP Assistant</div>
+        <div class="qc-gate-logo">QARP AI Assistant</div>
         <div class="qc-gate-sub">Your smart assistant for The QARP services, courses, and more.</div>
         <input class="qc-gate-input" id="qarp-gate-name" type="text" placeholder="Your name" autocomplete="name">
         <input class="qc-gate-input" id="qarp-gate-email" type="email" placeholder="Work email" autocomplete="email">
         <div class="qc-gate-privacy">
           <input type="checkbox" id="qarp-gate-privacy">
-          <label for="qarp-gate-privacy">I agree to the <a href="https://theqarp.com/privacy" target="_blank">Privacy Policy</a> and consent to receive follow-up communications from The QARP.</label>
+          <label for="qarp-gate-privacy">I agree to the <a href="https://theqarpacademy.pro/privacy" target="_blank">Privacy Policy</a> and consent to receive follow-up communications from The QARP.</label>
         </div>
         <button class="qc-gate-btn" id="qarp-gate-submit">Start Chat</button>
         <div class="qc-gate-err" id="qarp-gate-err" style="display:none"></div>
       </div>
 
       <!-- CHAT (hidden until lead captured) -->
-      <div class="qc-messages qc-welcome-state" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot qc-welcome-msg"><div class="qc-welcome"><span class="qc-welcome-icon">\u{1F916}</span><span class="qc-welcome-title">QARP Assistant</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>Ask about The QARP and our services</span><span class="qc-welcome-sub">Courses, audits, consulting, AI solutions</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit"><span class="qc-action-icon">\u{1F50D}</span> Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes"><span class="qc-action-icon">\u{1F4CB}</span> ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?"><span class="qc-action-icon">\u{1F393}</span> Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant"><span class="qc-action-icon">\u{1F4AC}</span> AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization"><span class="qc-action-icon">\u{1F3E2}</span> Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support"><span class="qc-action-icon">\u{1F4BC}</span> Consulting</button></div></div></div>
+      <div class="qc-messages qc-welcome-state" id="qarp-messages" style="display:none"><div class="qc-msg qc-msg-bot qc-welcome-msg"><div class="qc-welcome"><span class="qc-welcome-icon">\u{1F916}</span><span class="qc-welcome-title">QARP AI Assistant</span><span class="qc-welcome-body"><span id="qarp-welcome-name"></span>Ask about The QARP and our services</span><span class="qc-welcome-sub">Courses, audits, consulting, AI solutions</span></div><div class="qc-actions" id="qarp-quick-actions"><button class="qc-action" data-msg="I need help with a GxP audit"><span class="qc-action-icon">\u{1F50D}</span> Audits</button><button class="qc-action" data-msg="Tell me about ICH GCP E6(R3) key changes"><span class="qc-action-icon">\u{1F4CB}</span> ICH GCP R3</button><button class="qc-action" data-msg="What training courses do you offer?"><span class="qc-action-icon">\u{1F393}</span> Training</button><button class="qc-action" data-msg="Tell me about your GxP AI Assistant"><span class="qc-action-icon">\u{1F4AC}</span> AI Assistant</button><button class="qc-action" data-msg="We want to implement Enterprise AI for our organization"><span class="qc-action-icon">\u{1F3E2}</span> Enterprise AI</button><button class="qc-action" data-msg="I need GxP consulting support"><span class="qc-action-icon">\u{1F4BC}</span> Consulting</button></div></div></div>
 
       <div class="qc-input-area" id="qarp-input-area" style="display:none">
         <textarea class="qc-textarea" id="qarp-input" placeholder="Ask about The QARP..." rows="1"></textarea>
@@ -496,7 +496,7 @@
     var history = [];
     msgs.forEach(function(el) {
       var isUser = el.classList.contains('qc-msg-user');
-      history.push({ role: isUser ? 'User' : 'QARP Assistant', text: el.textContent.trim().substring(0, 500) });
+      history.push({ role: isUser ? 'User' : 'QARP AI Assistant', text: el.textContent.trim().substring(0, 500) });
     });
     fetch(LEAD_URL, {
       method: 'POST',
