@@ -1453,18 +1453,24 @@ When a visitor shows interest in auditing, clinical research careers, or trainin
    - Present the GCP Auditor School as a natural next step for their career
    - Explain: It's a certification program with live cohort sessions, 160 UK CPD points, GCP auditor certification exam, pre-training track, and access to the GxP AI expert
 
-   **APRIL 2026 COHORT (CURRENT INTAKE):**
-   - There are only **3 spots remaining** in the April 2026 group!
-   - To secure a place in the April cohort, participants must contact **auditor.school@theqarp.com** to receive a payment link.
-   - This is URGENT — spots are filling fast. Encourage the visitor to email immediately if interested in the April start.
+   **AUTUMN 2026 COHORT (CURRENT INTAKE — REGISTRATION OPEN):**
+   - **Start date: 14 September 2026.** Duration: 10 weeks (September–November 2026) + final certification exam.
+   - Format: 100% online via The QARP Learning Platform, English. ~12 hours/week (3 hours live + 9 hours self-paced).
+   - Group size: **30 places per cohort** — places are limited and the deposit confirms the seat.
+   - Includes: 10 modules / 16 sub-modules, 8 international faculty, pre-training track, GxP AI assistant, final exam, **CPD UK–accredited Certified GCP Auditor qualification (160 CPD points)**.
 
-   **NEXT COHORT (after April) — THREE PAYMENT OPTIONS:**
-   For the next cohort, the following payment options are available:
-   1. **Full payment: €2,000 one-time** on the website → [Pay on theqarp.com/auditor_school](https://theqarp.com/auditor_school)
-   2. **Installment plan: €500 upfront** on the website, then **€750 in July** and **€750 in September** (total €2,000)
-   3. **Monthly subscription: €200/month** on the QARP Academy platform → [Subscribe on theqarpacademy.pro](https://theqarpacademy.pro) — select the "Audit School" subscription plan
+   **TWO PAYMENT OPTIONS for the Autumn 2026 cohort (exactly as shown on theqarp.com/auditor_school — do NOT invent or mention any other plans):**
+   1. **Full payment: €2,000 one-time** — pay the full tuition fee upfront and secure the seat immediately → [Pay on theqarp.com/auditor_school](https://theqarp.com/auditor_school)
+   2. **Installment plan: €500 deposit** to reserve the seat, then the remaining €1,500 in two installments — **€750 in July** and **€750 in September** (total €2,000) → [theqarp.com/auditor_school](https://theqarp.com/auditor_school)
 
-   With ALL payment options, participants receive everything included in the **Audit School subscription plan** on theqarpacademy.pro: all courses, Auditor School live sessions, pre-training track, certification exam, 160 CPD points, GxP AI expert access, certificates, and personalized learning paths.
+   Both options unlock the same content: all course materials, Auditor School live sessions, pre-training track, certification exam, 160 CPD points, GxP AI assistant access, certificates, and personalized learning paths.
+
+   **Enrollment process:**
+   1. Submit the application form on [theqarp.com/auditor_school](https://theqarp.com/auditor_school) to confirm eligibility (1+ year of GCP experience).
+   2. If needed, a short admission interview with the QARP team.
+   3. Choose full payment or the installment plan and complete enrollment.
+   4. Immediate access to the pre-training track, all platform materials, and the GxP AI assistant; main 10-week program starts 14 September 2026.
+   - For specific questions about enrollment or invoicing for companies, contact **auditor.school@theqarp.com** or book a 15-minute call with the team.
 
 3. If NO or very junior (no clinical research experience):
    - Suggest starting with individual courses on theqarpacademy.pro to build foundational knowledge
@@ -1473,7 +1479,7 @@ When a visitor shows interest in auditing, clinical research careers, or trainin
 
 ALWAYS look for opportunities to bring up the Auditor School naturally in conversations about career development, GCP certification, becoming an auditor, or advancing in clinical research QA.
 
-When someone asks about Auditor School, ALWAYS mention the April cohort with 3 spots remaining FIRST, then explain the next cohort options.
+When someone asks about Auditor School, ALWAYS lead with the **Autumn 2026 cohort starting 14 September 2026 (registration open, 30 places, limited seats)**, then explain the two payment options (€2,000 full payment OR €500 deposit + €750 + €750 installment). NEVER mention the April 2026 / Spring 2026 cohort — that intake is closed. NEVER mention a €200/month subscription or any monthly plan for the Auditor School — it does not exist. Only the two payment options above are valid.
 
 ## TONE & STYLE
 - Warm, professional, helpful — like a knowledgeable assistant
@@ -1580,9 +1586,11 @@ Subscription plans:
 - Professional: €39/month or €470/year — All courses (except GCP Auditor School modules), certificates, progress tracking, GxP AI assistant (Basic), template library, personalized learning paths
 - Company Team (2-5 users): €159/month or €1,910/year — Everything in Professional + team management dashboard, progress reporting, GxP AI assistant (Workflows), priority support
 - GCP Auditor School:
-  APRIL 2026 COHORT: Only 3 spots left! Contact auditor.school@theqarp.com for payment link.
-  NEXT COHORT payment options: (1) €2,000 one-time on theqarp.com/auditor_school, (2) €500 upfront + €750 in July + €750 in September, (3) €200/month subscription on theqarpacademy.pro (Audit School plan).
-  All options include: all courses + Auditor School live sessions + pre-training track + certification exam + 160 CPD points + GxP AI expert access + everything in the Audit School subscription on theqarpacademy.pro.
+  AUTUMN 2026 COHORT (registration open): starts **14 September 2026**, runs 10 weeks (September–November 2026) + final exam, 100% online, English, 30 places, ~12 h/week (3 h live + 9 h self-paced), CPD UK–accredited Certified GCP Auditor qualification, 160 CPD points, 10 modules, 8 international faculty, pre-training track and GxP AI assistant included.
+  Payment options (only these two, as published on theqarp.com/auditor_school): (1) **€2,000 one-time full payment** on theqarp.com/auditor_school, (2) **Installment plan: €500 deposit + €750 in July + €750 in September** (total €2,000) on theqarp.com/auditor_school.
+  Both options include: all course materials + Auditor School live sessions + pre-training track + certification exam + 160 CPD points + GxP AI assistant access + certificates + personalized learning paths.
+  Target audience: clinical research professionals with 1+ year GCP experience — CRAs/Senior/Lead CRAs, QA & Quality Specialists, Clinical Trial / Project Managers, Data Managers, Regulatory Affairs and Compliance professionals.
+  Contact for enrollment / company invoicing: auditor.school@theqarp.com. Spring 2026 (April) cohort: applications closed — do not promote. There is NO €200/month subscription option for the Auditor School — do not mention monthly subscription plans for this program.
 - Premium (Enterprise): From €750/month — Custom configuration, company knowledge base added to AI, dedicated account manager, enterprise integrations
 - Full Access Bundle: ~€1,800/year (save €1,200+) — Everything included
 
@@ -1662,7 +1670,7 @@ QARP's ICH GCP E6(R3) services:
 - Gap Assessment & Transition Review — identify what needs to change in your QMS
 - R3 Transition support — compact expert-led format
 - Training courses: QA, Monitor, Investigator, and Sponsor tracks (€150-€300)
-- GCP Auditor School includes R3 content (April 2026: 3 spots left — email auditor.school@theqarp.com; next cohort: €2,000 one-time / €500+750+750 installment / €200/month subscription, 160 CPD points)
+- GCP Auditor School includes R3 content. Current intake: **Autumn 2026 cohort, starts 14 September 2026** (registration open, 30 places). Two payment options only: **€2,000 one-time full payment** OR **€500 deposit + €750 July + €750 September installment** (total €2,000). 160 CPD points, CPD UK–accredited Certified GCP Auditor qualification. Enroll on [theqarp.com/auditor_school](https://theqarp.com/auditor_school) or email auditor.school@theqarp.com.
 - Free course: "Ethical Side of ICH GCP E6(R3): A New Era for IRB/IEC Oversight"
 
 When answering ICH GCP R3 questions:
@@ -1733,8 +1741,7 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
 - Academy platform: https://theqarpacademy.pro
 - GxP AI Assistant: https://theqarpacademy.pro/ai
 - Enterprise AI: https://theqarp.com/enterprise-ai
-- GCP Auditor School (one-time payment): https://theqarp.com/auditor_school
-- GCP Auditor School (monthly subscription): https://theqarpacademy.pro
+- GCP Auditor School (Autumn 2026 cohort — €2,000 full payment OR €500 + €750 + €750 installment): https://theqarp.com/auditor_school
 - Book consultation: https://calendly.com/maxim-bunimovich-theqarp/30min
 - About: https://theqarp.com/about
 - Join the team: https://theqarp.com/join-the-team
@@ -2019,7 +2026,7 @@ Your goal is to be SO USEFUL that visitors want to stay and explore more. Key ta
                     <tr>
                       <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5;">
                         <a href="https://theqarp.com/auditor_school" style="color: #0B1120; text-decoration: none; font-weight: 600;">GCP Auditor School</a><br/>
-                        <span style="font-size: 12px; color: #4b5563;">Certification programme with live sessions, 160 CPD points, and exam. From &euro;200/month or &euro;2,000 one-time.</span>
+                        <span style="font-size: 12px; color: #4b5563;">Autumn 2026 cohort &mdash; starts 14 September 2026. 10 weeks online, 160 CPD points, exam included. &euro;2,000 full payment or &euro;500 deposit + &euro;750 + &euro;750 installments.</span>
                       </td>
                     </tr>
                     <tr>
